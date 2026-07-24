@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRG Grouper จำลอง + แจ้งเตือนแพทย์</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'TH Sarabun New', Sarabun, sans-serif; font-size: 16px; background: #f1f5f9; color: #1e293b; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; padding: 16px 24px; }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .header p  { font-size: 13px; color: #bfdbfe; }
+  .header .warn-bar { background: #1e3a8a; border-top: 1px solid #2563eb; margin: 12px -24px -16px; padding: 6px 24px; font-size: 12px; color: #fde68a; }
+
+  /* Layout */
+  .main { display: flex; gap: 16px; padding: 16px; max-width: 1400px; margin: 0 auto; }
+  @media(max-width:900px){ .main { flex-direction: column; } }
+
+  /* Cards */
+  .card { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.1); overflow: hidden; }
+  .card-header { padding: 12px 16px; font-weight: 700; font-size: 15px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+  .card-body { padding: 16px; }
+
+  /* Input panel */
+  .input-panel { width: 380px; flex-shrink: 0; }
+  .result-panel { flex: 1; min-width: 0; }
+
+  .field-group { margin-bottom: 10px; }
+  .field-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 4px; }
+  .field-group input, .field-group select {
+    width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px;
+    font-size: 15px; font-family: inherit; outline: none; transition: border-color .2s;
+  }
+  .field-group input:focus, .field-group select:focus { border-color: #3b82f6; }
+  .field-group .hint { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .section-label { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; margin: 14px 0 6px; padding-bottom: 4px; border-bottom: 1px solid #f1f5f9; }
+
+  .btn-calc { width: 100%; padding: 12px; background: #1e40af; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .2s; margin-top: 14px; }
+  .btn-calc:hover { background: #1d4ed8; }
+  .btn-clear { width: 100%; padding: 8px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; margin-top: 6px; }
+  .btn-clear:hover { background: #e2e8f0; }
+
+  /* Add-field buttons (SDx / Operation) */
+  .btn-add { width: 100%; padding: 6px 10px; background: #f8fafc; color: #2563eb; border: 1.5px dashed #93c5fd; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; margin-top: 2px; transition: .15s; }
+  .btn-add:hover { background: #eff6ff; border-color: #3b82f6; }
+  .btn-add:disabled { color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; background: #f8fafc; }
+  .field-wrap { position: relative; }
+  .field-wrap .btn-remove { position: absolute; top: 0; right: 0; background: none; border: none; color: #cbd5e1; font-size: 13px; cursor: pointer; line-height: 1; padding: 2px 4px; }
+  .field-wrap .btn-remove:hover { color: #dc2626; }
+
+  /* Result boxes */
+  .drg-result { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .res-box { border-radius: 10px; padding: 12px 14px; }
+  .res-box .rb-label { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+  .res-box .rb-val  { font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .res-box.wide { grid-column: span 2; }
+  .rb-blue   { background: #eff6ff; } .rb-blue .rb-val   { color: #1e40af; }
+  .rb-green  { background: #f0fdf4; } .rb-green .rb-val  { color: #16a34a; }
+  .rb-red    { background: #fef2f2; } .rb-red .rb-val    { color: #dc2626; }
+  .rb-amber  { background: #fffbeb; } .rb-amber .rb-val  { color: #d97706; }
+  .rb-purple { background: #faf5ff; } .rb-purple .rb-val { color: #7c3aed; }
+  .rb-gray   { background: #f8fafc; } .rb-gray .rb-val   { color: #475569; }
+  .rw-big { font-size: 32px !important; }
+
+  /* CC/MCC tags */
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 13px; font-weight: 700; margin: 2px; }
+  .tag-mcc  { background:#fee2e2; color:#dc2626; }
+  .tag-cc   { background:#fef3c7; color:#d97706; }
+  .tag-none { background:#f1f5f9; color:#94a3b8; }
+
+  /* Alerts */
+  .alert-empty { text-align:center; padding: 32px; color: #94a3b8; font-size: 15px; }
+  .alert-ok    { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px 16px; margin-bottom:12px; color:#166534; font-size:15px; }
+
+  .alert-item  { border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; border-left: 4px solid; }
+  .alert-high   { background:#fff1f2; border-color:#dc2626; }
+  .alert-medium { background:#fffbeb; border-color:#f59e0b; }
+  .alert-low    { background:#faf5ff; border-color:#7c3aed; }
+  .alert-title  { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .alert-high .alert-title   { color: #dc2626; }
+  .alert-medium .alert-title { color: #d97706; }
+  .alert-low .alert-title    { color: #7c3aed; }
+  .alert-body   { font-size: 14px; color: #374151; white-space: pre-line; line-height: 1.7; }
+
+  /* Placeholder */
+  .placeholder { text-align:center; color: #94a3b8; padding: 40px 20px; font-size: 15px; line-height: 2; }
+  .placeholder .big { font-size: 40px; }
+
+  /* Tabs */
+  .tab-bar { display: flex; gap: 4px; padding: 12px 16px 0; border-bottom: 1px solid #e2e8f0; }
+  .tab-btn { padding: 8px 16px; border: none; background: none; font-family: inherit; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; border-radius: 6px 6px 0 0; transition: .15s; }
+  .tab-btn.active { color: #1e40af; border-bottom-color: #1e40af; background: #eff6ff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Scrollable alerts */
+  .alerts-scroll { max-height: 440px; overflow-y: auto; padding: 14px; }
+  .alerts-scroll::-webkit-scrollbar { width: 6px; }
+  .alerts-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+  /* Note */
+  .note-bar { background: #fef9c3; border-top: 1px solid #fde68a; padding: 8px 16px; font-size: 12px; color: #713f12; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏥 DRG Grouper จำลอง + แจ้งเตือนแพทย์</h1>
+  <p>ประมาณการ MDC · DRG · RW · CC/MCC · แจ้งเตือน DENY CODE สำหรับแพทย์</p>
+  <div class="warn-bar">⚠️ ค่า RW เป็นประมาณการเพื่อการศึกษาเท่านั้น — ไม่ใช่ผล DRG Grouper อย่างเป็นทางการ (Thai DRG v6)</div>
+</div>
+
+<div class="main">
+  <!-- ─── INPUT PANEL ─── -->
+  <div class="input-panel">
+    <div class="card">
+      <div class="card-header">📋 กรอกข้อมูลผู้ป่วย</div>
+      <div class="card-body">
+
+        <div class="section-label">รหัสโรค ICD-10</div>
+        <div class="field-group">
+          <label>PDx (โรคหลัก) <span style="color:#dc2626">*</span></label>
+          <input id="pdx" placeholder="เช่น A41.9, I21.0, J18.9" autocomplete="off">
+        </div>
+        <div class="row2" id="sdx-container"></div>
+        <button class="btn-add" id="btn-add-sdx" onclick="addSdx(true)">＋ เพิ่ม SDx</button>
+
+        <div class="section-label">หัตถการ ICD-9-CM</div>
+        <div class="row2" id="op-container"></div>
+        <button class="btn-add" id="btn-add-op" onclick="addOp(true)">＋ เพิ่ม Operation</button>
+
+        <div class="section-label">ข้อมูลทั่วไป</div>
+        <div class="row3">
+          <div class="field-group"><label>อายุ (ปี)</label><input id="age" type="number" min="0" max="150" placeholder="—"></div>
+          <div class="field-group"><label>LOS (วัน)</label><input id="los" type="number" min="0" placeholder="—"></div>
+          <div class="field-group">
+            <label>เพศ</label>
+            <select id="sex"><option>ชาย</option><option>หญิง</option></select>
+          </div>
+        </div>
+
+        <div class="section-label">สถานะการจำหน่าย</div>
+        <div class="row2">
+          <div class="field-group">
+            <label>Discharge Status</label>
+            <select id="dchtype">
+              <option value="">— ไม่ระบุ —</option>
+              <option value="1">1 = หาย (Recovered)</option>
+              <option value="2">2 = ดีขึ้น (Improved)</option>
+              <option value="3">3 = ไม่ดีขึ้น (Not improved)</option>
+              <option value="4">4 = ตาย (Died)</option>
+              <option value="5">5 = ส่งต่อ (Referred)</option>
+              <option value="6">6 = หนีกลับ (LAMA)</option>
+              <option value="7">7 = ครบกำหนด</option>
+              <option value="8">8 = อื่นๆ</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>ประเภทโรงพยาบาล</label>
+            <select id="typehosp">
+              <option value="">— ไม่ระบุ —</option>
+              <option value="1">1 = ในเครือข่าย</option>
+              <option value="2">2 = นอกเครือข่าย</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-calc" onclick="calculate()">▶ คำนวณ DRG</button>
+        <button class="btn-clear" onclick="clearAll()">🗑 ล้างข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RESULT PANEL ─── -->
+  <div class="result-panel">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-header" style="background:#f8fafc">📊 ผล DRG (ประมาณการ)</div>
+      <div class="card-body">
+        <div id="result-area">
+          <div class="placeholder">
+            <div class="big">🏥</div>
+            กรอกข้อมูลและกด <strong>คำนวณ DRG</strong><br>
+            เพื่อดู MDC · DRG · RW · CC/MCC
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('alerts')">🔔 แจ้งเตือนแพทย์</button>
+        <button class="tab-btn" onclick="switchTab('ref')">📖 ตารางอ้างอิง</button>
+      </div>
+
+      <div id="tab-alerts" class="tab-content active">
+        <div class="alerts-scroll" id="alerts-area">
+          <div class="alert-empty">กดคำนวณ DRG เพื่อดูการแจ้งเตือน</div>
+        </div>
+      </div>
+
+      <div id="tab-ref" class="tab-content">
+        <div class="alerts-scroll">
+          <div style="padding:4px">
+            <div class="section-label" style="margin-top:0">MDC (Major Diagnostic Category)</div>
+            <table style="width:100%;border-collapse:collapse;font-size:14px">
+              <thead><tr style="background:#f8fafc">
+                <th style="padding:6px 8px;text-align:left;border:1px solid #e2e8f0">MDC</th>
+                <th style="padding:6px 8px;text-align:left;border:1px solid #e2e8f0">ชื่อ</th>
+                <th style="padding:6px 8px;text-align:left;border:1px solid #e2e8f0">ICD-10 หลัก</th>
+              </tr></thead>
+              <tbody id="mdc-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-bar">⚠️ โปรแกรมนี้ใช้เพื่อการศึกษา/ฝึกอบรม — ผล DRG จริงต้องใช้โปรแกรม Grouper อย่างเป็นทางการ</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// MCC / CC LISTS
+// ════════════════════════════════════════════════════
+const MCC_PFX = ["I21","I22","I60","I61","I62","I63","I64","J96","J95",
+  "N17","K72","A41","A40","R65.1","I50.0","C77","C78","C79","G93.1",
+  "T71","I46","P07","P22","E87.0","E87.1"];
+const CC_PFX  = ["I10","I11","I12","I13","I15","E10","E11","E12","E13","E14",
+  "N18","N19","J44","J45","I48","I49","K74","K70","K71","D50","D51","D52",
+  "D53","D55","D56","D57","D58","D59","D60","D61","D62","D63","D64","E66",
+  "I26","G20","G21","G30","F10","F11","F12","F13","F14","F15","F16","F17",
+  "F18","F19","M05","M06","B18","B19","B20","B21","B22","B23","B24","Z94",
+  "I70","I71","I72","I73","I74","J18","J15","J13","J14","J12","N20","N21",
+  "N22","R65.0","G40","G41","K57","K56","K55","C"];
+
+function classifyCCMCC(sdxList){
+  let mccs=[], ccs=[];
+  for(let s of sdxList){
+    s=s.toUpperCase().trim(); if(!s) continue;
+    if(MCC_PFX.some(p=>s.startsWith(p))) mccs.push(s);
+    else if(CC_PFX.some(p=>s.startsWith(p))) ccs.push(s);
+  }
+  return {mccs,ccs};
+}
+
+// ════════════════════════════════════════════════════
+// OR PROCEDURE CHECK
+// ════════════════════════════════════════════════════
+const NON_OR = new Set(["87","88","89","96","97","98","99"]);
+function isOR(opList){
+  for(let op of opList){
+    let s=op.replace(/\./g,"").trim(); if(s.length<2) continue;
+    let p2=s.slice(0,2);
+    if(NON_OR.has(p2)) continue;
+    let n=parseInt(p2,10);
+    if(n>=1&&n<=86) return op;
+  }
+  return null;
+}
+
+// ════════════════════════════════════════════════════
+// MDC CLASSIFICATION
+// ════════════════════════════════════════════════════
+const MDC_INFO = {
+  0: ["Pre-MDC","🔷"],
+  1: ["ระบบประสาท","🧠"],
+  2: ["ตา","👁"],
+  3: ["หู คอ จมูก","👂"],
+  4: ["ระบบทางเดินหายใจ","🫁"],
+  5: ["ระบบหัวใจและหลอดเลือด","❤️"],
+  6: ["ระบบทางเดินอาหาร","🍽"],
+  7: ["ตับ ท่อน้ำดี และตับอ่อน","🟫"],
+  8: ["ระบบกล้ามเนื้อและกระดูก","🦴"],
+  9: ["ผิวหนัง","🩹"],
+  10:["ต่อมไร้ท่อและโภชนาการ","⚗️"],
+  11:["ไตและระบบทางเดินปัสสาวะ","🫘"],
+  12:["อวัยวะสืบพันธุ์ชาย","♂"],
+  13:["อวัยวะสืบพันธุ์หญิง","♀"],
+  14:["การตั้งครรภ์และการคลอด","🤰"],
+  15:["ทารกแรกเกิด","👶"],
+  16:["เลือดและภูมิคุ้มกัน","💉"],
+  17:["เนื้องอก","🎗"],
+  18:["โรคติดเชื้อและปรสิต","🦠"],
+  19:["จิตเวชและพฤติกรรม","🧩"],
+  20:["สารเสพติดและแอลกอฮอล์","🚫"],
+  21:["บาดเจ็บและพิษ","🚑"],
+  22:["แผลไฟไหม้","🔥"],
+  23:["อื่นๆ และปัจจัยสุขภาพ","📋"],
+  24:["HIV","🔴"],
+};
+
+function getMDC(pdx, ops){
+  let p=pdx.toUpperCase().trim();
+  if(!p) return 23;
+  let opsc=ops.map(o=>o.replace(/\./g,""));
+  // Pre-MDC checks
+  if(opsc.some(o=>o.startsWith("9672")||o.startsWith("9670")||o.startsWith("9671"))) return 0;
+  if(opsc.some(o=>o.startsWith("311")||o.startsWith("3121")||o.startsWith("3961"))) return 0;
+  if(opsc.some(o=>o.startsWith("5051")||o.startsWith("3750")||o.startsWith("5569"))) return 0;
+  // Burns T20-T32
+  if(/^T[23][0-9]/.test(p)) return 22;
+  // HIV
+  if(/^B2[01234]/.test(p)) return 24;
+  let c=p[0];
+  if(c==="A"||c==="B") return /^B2[01234]/.test(p)?24:18;
+  if(c==="C") return 17;
+  if(c==="D") return /^D[0-4]/.test(p)?17:16;
+  if(c==="E") return 10;
+  if(c==="F") return /^F1[0-9]/.test(p)?20:19;
+  if(c==="G") return 1;
+  if(c==="H") return /^H[0-5]/.test(p)?2:3;
+  if(c==="I") return 5;
+  if(c==="J") return /^J(0[0-6]|3[0-9])/.test(p)?3:4;
+  if(c==="K") return /^K[78]/.test(p)?7:6;
+  if(c==="L") return 9;
+  if(c==="M") return 8;
+  if(c==="N"){
+    if(/^N[4-5]/.test(p)) return 12;
+    if(/^N[6-9]/.test(p)) return 13;
+    return 11;
+  }
+  if(c==="O") return 14;
+  if(c==="P") return 15;
+  if(c==="Q") return 23;
+  if(c==="R"||c==="Z") return 23;
+  if("STVWXY".includes(c)) return 21;
+  return 23;
+}
+
+// ════════════════════════════════════════════════════
+// DRG TABLE  [mdc, pdxRegex, needOR, drgName, rwBase, rwCC, rwMCC]
+// ════════════════════════════════════════════════════
+const DRG_TABLE = [
+  // Pre-MDC
+  [0,/./,true, "Pre-MDC: OR + Special procedure",8.0,10.0,15.0],
+  [0,/./,false,"Pre-MDC: Ventilator / Tracheostomy",6.0,8.0,12.0],
+  // MDC 1
+  [1,/^G35/,false,"Multiple sclerosis",2.5,3.5,5.0],
+  [1,/^G4[01]/,false,"ชัก / Epilepsy",1.0,1.5,2.5],
+  [1,/^G[2-3][0-5]/,false,"Parkinson / Alzheimer / Dementia",1.5,2.0,3.0],
+  [1,/^I6[0-2]/,false,"Stroke เลือดออก (Haemorrhagic)",3.5,4.5,6.0],
+  [1,/^I6[34]/,false,"Stroke ขาดเลือด (Ischaemic)",2.5,3.5,5.0],
+  [1,/^G0/,false,"เยื่อหุ้มสมองอักเสบ / Meningitis",2.0,3.0,4.5],
+  [1,/^G93/,false,"โรคสมองอื่นๆ",1.8,2.5,4.0],
+  [1,/./,true, "การผ่าตัดระบบประสาท",5.0,7.0,10.0],
+  [1,/./,false,"โรคระบบประสาท อื่นๆ",1.2,1.8,2.8],
+  // MDC 2
+  [2,/./,true, "การผ่าตัดดวงตา",1.5,2.0,3.0],
+  [2,/./,false,"โรคตา",0.6,0.9,1.5],
+  // MDC 3
+  [3,/^J0[0-6]/,false,"URTI / Common cold / Pharyngitis",0.2,0.4,0.8],
+  [3,/^J3[0-6]/,false,"Sinusitis / Rhinitis",0.3,0.6,1.0],
+  [3,/^J37|^J38/,false,"Laryngitis / Vocal cord",0.4,0.7,1.2],
+  [3,/./,true, "การผ่าตัด ENT",1.5,2.2,3.5],
+  [3,/./,false,"โรค ENT",0.5,0.8,1.5],
+  // MDC 4
+  [4,/^J2[01]/,false,"Acute bronchitis",0.3,0.6,1.0],
+  [4,/^J1[2-8]/,false,"ปอดอักเสบ (Pneumonia)",1.2,2.0,3.5],
+  [4,/^J44/,false,"COPD exacerbation",1.2,1.8,2.8],
+  [4,/^J4[56]/,false,"Asthma",0.9,1.4,2.2],
+  [4,/^J96/,false,"Respiratory failure",2.5,3.5,5.5],
+  [4,/^J93/,false,"Pneumothorax",1.5,2.2,3.5],
+  [4,/^J86/,false,"Pyothorax / Empyema",2.5,3.5,5.0],
+  [4,/^J2[3-6]/,false,"Pulmonary embolism",2.0,3.0,4.5],
+  [4,/./,true, "การผ่าตัดทรวงอก",5.0,7.0,10.0],
+  [4,/./,false,"โรคระบบทางเดินหายใจ อื่นๆ",1.0,1.5,2.5],
+  // MDC 5
+  [5,/^I2[12]/,false,"กล้ามเนื้อหัวใจตาย (AMI)",2.5,3.5,5.5],
+  [5,/^I20/,false,"Unstable angina / Angina",1.5,2.2,3.5],
+  [5,/^I50/,false,"Heart failure (CHF)",1.5,2.2,3.5],
+  [5,/^I4[6-9]/,false,"Arrhythmia / AF / Arrest",1.2,1.8,3.0],
+  [5,/^I1[0-3]/,false,"Hypertension",0.8,1.2,2.0],
+  [5,/^I6[0-4]/,false,"Stroke",3.0,4.0,6.0],
+  [5,/^I7[0-4]/,false,"Vascular disease",2.0,3.0,4.5],
+  [5,/^I26/,false,"Pulmonary embolism",2.0,3.0,4.5],
+  [5,/./,true, "CABG / PCI / Cardiac surgery",7.0,10.0,14.0],
+  [5,/./,false,"โรคระบบหัวใจหลอดเลือด อื่นๆ",1.2,1.8,2.8],
+  // MDC 6
+  [6,/^K2[1-2]/,false,"Gastro-oesophageal reflux / Oesophagitis",0.4,0.7,1.2],
+  [6,/^K3[0-1]/,false,"Functional GI disorder",0.3,0.5,0.9],
+  [6,/^K3[5-7]/,false,"Appendicitis",1.2,1.8,3.0],
+  [6,/^K2[5-8]/,false,"แผลในกระเพาะอาหาร (PUD)",1.0,1.6,2.8],
+  [6,/^K92/,false,"GI hemorrhage",1.5,2.2,3.5],
+  [6,/^K5[0-2]/,false,"Inflammatory bowel disease",1.8,2.5,4.0],
+  [6,/^K56/,false,"Intestinal obstruction",2.0,3.0,4.5],
+  [6,/^K6[56]/,false,"Peritonitis",3.0,4.5,6.5],
+  [6,/./,true, "การผ่าตัดระบบทางเดินอาหาร",4.0,5.5,8.0],
+  [6,/./,false,"โรคระบบทางเดินอาหาร อื่นๆ",0.6,1.0,1.8],
+  // MDC 7
+  [7,/^K72/,false,"Hepatic failure / Encephalopathy",3.5,5.0,7.0],
+  [7,/^K7[01345]/,false,"Cirrhosis / Liver disease",2.0,3.0,5.0],
+  [7,/^K8[56]/,false,"Pancreatitis",2.0,3.0,4.5],
+  [7,/^K8[0-3]/,false,"Biliary disease",1.5,2.2,3.5],
+  [7,/./,true, "การผ่าตัดตับ ท่อน้ำดี ตับอ่อน",5.0,7.0,10.0],
+  [7,/./,false,"โรคตับ ท่อน้ำดี ตับอ่อน อื่นๆ",1.5,2.2,3.5],
+  // MDC 8
+  [8,/^M54\.5|^M545/,false,"Low back pain",0.3,0.5,1.0],
+  [8,/^M54/,false,"Back pain / Cervicalgia",0.3,0.5,1.0],
+  [8,/^M79/,false,"Soft tissue disorder / Fibromyalgia",0.3,0.5,0.9],
+  [8,/^M25/,false,"Joint pain / Effusion",0.4,0.7,1.2],
+  [8,/^M16/,true, "เปลี่ยนข้อสะโพก (THR)",5.0,6.5,9.0],
+  [8,/^M17/,true, "เปลี่ยนข้อเข่า (TKR)",4.5,6.0,8.5],
+  [8,/^M86/,false,"Osteomyelitis",2.5,3.5,5.0],
+  [8,/^M10/,false,"Gout",0.5,0.9,1.5],
+  [8,/./,true, "การผ่าตัดระบบกล้ามเนื้อกระดูก",3.5,4.5,6.5],
+  [8,/./,false,"โรคกล้ามเนื้อและกระดูก อื่นๆ",0.5,0.9,1.8],
+  // MDC 9
+  [9,/^M72\.6/,true,"Necrotizing fasciitis + Surgery",4.5,6.0,8.5],
+  [9,/^L0[0-8]/,false,"Cellulitis / Skin infection",0.6,1.0,1.8],
+  [9,/^L2[0-9]/,false,"Dermatitis / Eczema",0.3,0.5,0.9],
+  [9,/^L4[0-9]/,false,"Psoriasis",0.4,0.7,1.2],
+  [9,/^L8[0-9]/,false,"Skin ulcer",0.7,1.2,2.0],
+  [9,/./,true, "การผ่าตัดผิวหนัง",2.5,3.5,5.0],
+  [9,/./,false,"โรคผิวหนัง อื่นๆ",0.4,0.7,1.3],
+  // MDC 10
+  [10,/^E1[0-4]\.1[0-3]/,false,"DM + Ketoacidosis (DKA)",2.5,3.5,5.0],
+  [10,/^E1[0-4]\.6[0-5]/,false,"DM + Hypoglycaemia",0.9,1.4,2.2],
+  [10,/^E1[0-4]\.9/,false,"DM ไม่มีภาวะแทรกซ้อน",0.5,0.8,1.4],
+  [10,/^E1[0-4]/,false,"DM with complications",0.9,1.4,2.2],
+  [10,/^E0[0-7]/,false,"Thyroid disorder",0.5,0.9,1.5],
+  [10,/^E6[0-6]/,false,"Nutritional / Obesity",0.4,0.7,1.2],
+  [10,/^E8[3-7]/,false,"Electrolyte imbalance",0.6,1.0,1.8],
+  [10,/./,true, "การผ่าตัดต่อมไร้ท่อ",2.5,3.5,5.0],
+  [10,/./,false,"โรคต่อมไร้ท่อ อื่นๆ",0.5,0.9,1.6],
+  // MDC 11
+  [11,/^N17/,false,"Acute kidney injury (AKI)",2.0,3.0,4.5],
+  [11,/^N18/,false,"CKD / Renal failure",1.2,1.8,2.8],
+  [11,/^N3[0-4]/,false,"Cystitis / Lower UTI",0.4,0.7,1.2],
+  [11,/^N39\.0/,false,"UTI ไม่ระบุตำแหน่ง",0.4,0.7,1.2],
+  [11,/^N39/,false,"UTI / Urinary disorder",0.5,0.8,1.4],
+  [11,/^N1[012]/,false,"Pyelonephritis / Upper UTI",0.8,1.4,2.2],
+  [11,/^N2[012]/,false,"Kidney stone",1.2,1.8,3.0],
+  [11,/./,true, "การผ่าตัดไตและทางเดินปัสสาวะ",3.0,4.0,6.0],
+  [11,/./,false,"โรคไตและทางเดินปัสสาวะ อื่นๆ",0.8,1.2,2.0],
+  // MDC 12 13
+  [12,/./,true, "การผ่าตัดอวัยวะสืบพันธุ์ชาย",2.0,3.0,4.5],
+  [12,/./,false,"โรคอวัยวะสืบพันธุ์ชาย",0.7,1.0,1.8],
+  [13,/./,true, "การผ่าตัดอวัยวะสืบพันธุ์หญิง",2.5,3.5,5.0],
+  [13,/./,false,"โรคอวัยวะสืบพันธุ์หญิง",0.7,1.0,1.8],
+  // MDC 14
+  [14,/./,true, "C-Section (ผ่าคลอด)",2.0,2.5,3.5],
+  [14,/./,false,"Normal / Vaginal delivery",0.9,1.3,2.0],
+  // MDC 15
+  [15,/^P07/,false,"Preterm / Low birth weight",5.0,7.0,10.0],
+  [15,/^P22/,false,"RDS ทารก",3.5,5.0,7.5],
+  [15,/^P3[6-8]/,false,"Sepsis ทารก",3.0,4.5,6.5],
+  [15,/^Z38/,false,"ทารกแรกเกิดปกติ",0.5,0.7,1.0],
+  [15,/./,false,"ทารกแรกเกิด อื่นๆ",1.5,2.5,4.0],
+  // MDC 16 17 18
+  [16,/^D6[0-4]/,false,"Aplastic / Bleeding disorder",1.8,2.5,4.0],
+  [16,/^D5/,false,"Anaemia",0.8,1.2,2.0],
+  [16,/./,false,"โรคเลือด อื่นๆ",1.2,1.8,3.0],
+  [17,/./,true, "การผ่าตัดมะเร็ง",4.0,5.5,8.0],
+  [17,/./,false,"เนื้องอก / มะเร็ง (Medical)",2.0,3.0,4.5],
+  // A09 Diarrhea / Gastroenteritis — RW ต่ำมาก
+  [18,/^A09/,false,"Diarrhea / Gastroenteritis",0.2,0.4,0.8],
+  [18,/^A0[0-8]/,false,"Intestinal infection (Salmonella/Shigella/etc.)",0.4,0.7,1.2],
+  // Common low-RW infections
+  [18,/^B0[0-9]/,false,"Viral infection (Herpes/Varicella/etc.)",0.3,0.6,1.0],
+  [18,/^B3[0-4]/,false,"Viral conjunctivitis / Hand-foot-mouth",0.2,0.4,0.7],
+  [18,/^B99|^B9[0-8]/,false,"Unspecified viral infection",0.3,0.5,0.9],
+  // Moderate infections
+  [18,/^A4[01]/,false,"Septicaemia",2.5,3.5,5.5],
+  [18,/^A3[6-9]/,false,"Streptococcal / Meningococcal infection",1.5,2.2,3.5],
+  [18,/^A1[5-9]/,false,"Tuberculosis (TB)",1.5,2.2,3.5],
+  [18,/^B5[0-4]/,false,"Malaria",1.0,1.5,2.5],
+  [18,/^B2[01234]/,false,"HIV/AIDS",3.0,4.5,6.5],
+  [18,/./,false,"โรคติดเชื้อ อื่นๆ",0.6,1.0,1.8],
+  // MDC 19 20 21 22 23 24
+  [19,/^F3/,false,"Mood / Depression",0.8,1.2,2.0],
+  [19,/^F2/,false,"Schizophrenia / Psychosis",1.0,1.5,2.5],
+  [19,/./,false,"โรคจิตเวช อื่นๆ",0.7,1.0,1.8],
+  [20,/^F10/,false,"Alcohol use disorder",0.8,1.2,2.0],
+  [20,/./,false,"Drug use disorder",0.9,1.3,2.2],
+  [21,/^S0/,false,"Head / Neck injury",1.5,2.2,3.5],
+  [21,/^T3[6-9]|^T4|^T5[0-6]/,false,"Poisoning / OD",1.2,1.8,3.0],
+  [21,/./,true, "การผ่าตัดบาดเจ็บ",3.5,4.5,6.5],
+  [21,/./,false,"บาดเจ็บ อื่นๆ",1.0,1.5,2.5],
+  [22,/^T3[12]/,false,"แผลไฟไหม้ >30% TBSA",8.0,12.0,18.0],
+  [22,/./,true, "การผ่าตัดแผลไฟไหม้",4.0,6.0,9.0],
+  [22,/./,false,"แผลไฟไหม้ (Medical)",1.5,2.5,4.0],
+  [23,/^R1[0-9]/,false,"Abdominal pain / Nausea",0.3,0.5,0.9],
+  [23,/^R5[0-9]/,false,"Fever / Malaise",0.3,0.5,0.9],
+  [23,/^R0[0-9]/,false,"Chest pain / Palpitation",0.4,0.7,1.2],
+  [23,/^Z[0-9]/,false,"ปัจจัยส่งผลต่อสุขภาพ (Z code)",0.3,0.5,0.9],
+  [23,/./,false,"อื่นๆ",0.4,0.7,1.3],
+  [24,/./,false,"HIV/AIDS + Complications",3.0,4.5,6.5],
+  [0,/./,false,"Pre-MDC",6.0,8.0,12.0],
+];
+
+function getDRG(mdc, pdx, hasOR, mccs, ccs){
+  let p=pdx.toUpperCase();
+  let lvl = mccs.length?"MCC":(ccs.length?"CC":null);
+  for(let [m,rx,needOR,name,rwB,rwCC,rwMCC] of DRG_TABLE){
+    if(m!==mdc) continue;
+    if(needOR && !hasOR) continue;
+    if(rx.test(p) || rx.source==="."){
+      let rw = lvl==="MCC"?rwMCC:(lvl==="CC"?rwCC:rwB);
+      return {name, rw:Math.round(rw*1000)/1000, lvl};
+    }
+  }
+  return {name:"ไม่สามารถจัดกลุ่มได้", rw:0, lvl:null};
+}
+
+// ════════════════════════════════════════════════════
+// PHYSICIAN ALERTS
+// ════════════════════════════════════════════════════
+// helper: เช็ค code (รับทั้ง A419 และ A41.9)
+function ck(codes, prefix){
+  let pNoDot = prefix.replace(/\./g,"");
+  return codes.some(c=>c.startsWith(prefix)||c.replace(/\./g,"").startsWith(pNoDot));
+}
+
+const ALERTS = [
+  {id:"PA01",sev:"high",
+   title:"⚠️ A41.9 Sepsis — ไม่ระบุสาเหตุ (เสี่ยง DENY CR1)",
+   trigger:(p,s,o)=>ck([p],"A41.9"),
+   msg:`PDx 'A41.9 Sepsis unspecified' จะถูก AI-Audit ตรวจสอบ\nกรุณาระบุสาเหตุให้ชัดเจน:
+
+  A41.01 = Sepsis due to MRSA
+  A41.02 = Sepsis due to other Staph.
+  A41.1  = Sepsis due to Streptococcus
+  A41.51 = Sepsis due to E. coli
+  A41.59 = Sepsis due to Gram-negative
+  A41.81 = Sepsis due to Enterococcus
+
+📌 ต้องมีผล Culture หรือหลักฐานทางคลินิกก่อนระบุชนิด`},
+
+  {id:"PA02",sev:"high",
+   title:"⚠️ E87.2 Acidosis — ไม่ควรเป็น PDx (CR5/EA04)",
+   trigger:(p,s,o)=>ck([p],"E87.2"),
+   msg:`Acidosis เป็นอาการ ไม่ใช่โรคหลัก
+ให้รหัสโรคสาเหตุเป็น PDx:
+
+  DKA           → E10.10 / E11.10
+  Renal cause   → N17.x / N18.x
+  Lactic acid   → E87.20 (ถ้าสาเหตุไม่ชัด)
+  Liver failure → K72.x
+
+📌 Golden Rule: ให้รหัสที่ใช้ทรัพยากรมากสุดเป็น PDx`},
+
+  {id:"PA03",sev:"high",
+   title:"⚠️ R57.x Shock — ไม่ควรเป็น PDx (CR37)",
+   trigger:(p,s,o)=>ck([p],"R57"),
+   msg:`Shock เป็นภาวะแทรกซ้อน ให้รหัสสาเหตุเป็น PDx:
+
+  Cardiogenic  → I50.0 (CHF) หรือ I21 (AMI)
+  Septic       → A41.x เป็น PDx + R57.2 เป็น SDx
+  Hypovolaemic → K92.x หรือ S/T (trauma)
+  Anaphylactic → T78.2
+
+📌 R57 ให้เป็น SDx หลังระบุสาเหตุเป็น PDx`},
+
+  {id:"PA04",sev:"high",
+   title:"⚠️ R60/E87.7 Volume overload — ไม่ควรเป็น PDx (CR8)",
+   trigger:(p,s,o)=>ck([p],"R60")||ck([p],"E87.7"),
+   msg:`Edema / Volume overload เป็นอาการ ไม่ใช่โรคหลัก
+ให้รหัสสาเหตุเป็น PDx:
+
+  CHF       → I50.0
+  CKD       → N18.x
+  Nephrotic → N04.x
+  Cirrhosis → K74.x
+  Hypoalb.  → E43 / E46
+
+📌 R60 / E87.7 ให้เป็น SDx`},
+
+  {id:"PA05",sev:"medium",
+   title:"🔶 J44.9 COPD — ไม่ระบุความรุนแรง (CR13_1)",
+   trigger:(p,s,o)=>ck([p],"J44.9"),
+   msg:`J44.9 อาจถูกตรวจสอบถ้า LOS สั้นหรือจำหน่ายเป็น "หาย"
+
+ถ้ามีอาการกำเริบ ให้ใช้:
+  J44.1 = COPD with acute exacerbation
+  J44.0 = COPD with acute lower resp. infection
+
+📌 บันทึก Severity, O2 sat, ABG และการรักษาในเวชระเบียน`},
+
+  {id:"PA06",sev:"high",
+   title:"⚠️ J96.0 Respiratory failure — ต้องมีรหัส Ventilator (EA06)",
+   trigger:(p,s,o)=>ck([p,...s],"J96.0"),
+   msg:`J96.0 ต้องมีรหัสหัตถการ Ventilator:
+
+  96.04 = Insertion of endotracheal tube
+  96.05 = Other intubation of resp. tract
+  96.70 = Invasive mech. ventilation (<96h)
+  96.71 = Invasive mech. ventilation (≥96h)
+
+📌 ถ้าให้ O2 mask เฉยๆ ไม่ใช่ Respiratory failure ตาม ICD-10`},
+
+  {id:"PA07",sev:"high",
+   title:"⚠️ N17 + N18.5 AKI + ESRD — ขัดแย้งกัน (EA11)",
+   trigger:(p,s,o)=>ck([p,...s],"N17")&&ck([p,...s],"N18.5"),
+   msg:`N17 (AKI) และ N18.5 (ESRD) ไม่ควรอยู่ด้วยกัน:
+
+  ถ้าเป็น ESRD อยู่แล้ว    → N18.5 เป็น PDx/SDx
+  ถ้าเกิด AKI บน CKD stage 3 → N17.9 + N18.3
+  ถ้าเกิด AKI บน CKD stage 4 → N17.9 + N18.4
+
+📌 N18.5 หมายถึง GFR < 15 หรือต้องฟอกไตแล้ว (ESRD)`},
+
+  {id:"PA08",sev:"high",
+   title:"⚠️ D62 โลหิตจาง — ต้องมีรหัสให้เลือด (EA01)",
+   trigger:(p,s,o)=>ck([p,...s],"D62")&&
+            !o.some(x=>x.replace(/\./g,"").startsWith("9904")||x.replace(/\./g,"").startsWith("9900")),
+   msg:`D62 (Acute posthemorrhagic anaemia) ต้องมีรหัสการให้เลือด:
+
+  99.04 = Transfusion of packed cells
+  99.00 = Transfusion of whole blood
+
+📌 ถ้าไม่ได้ให้เลือด ทบทวนว่าใช้ D62 ถูกหรือไม่`},
+
+  {id:"PA09",sev:"high",
+   title:"⚠️ 00.66 PCI — ต้องระบุจำนวนหลอดเลือด (EA18)",
+   trigger:(p,s,o)=>o.some(x=>x.replace(/\./g,"")=="0066"),
+   msg:`00.66 (PTCA) ต้องมีรหัสจำนวนหลอดเลือด:
+
+  00.40 = Single vessel
+  00.41 = Two vessels
+  00.42 = Three vessels
+  00.43 = Four or more vessels
+  00.44 = Vessel bifurcation
+
+📌 ดู Cath report สำหรับจำนวนหลอดเลือดที่ทำ`},
+
+  {id:"PA10",sev:"high",
+   title:"⚠️ R65 SIRS/Sepsis — ตรวจสอบ Subdivision (EA16)",
+   trigger:(p,s,o)=>ck([p,...s],"R65"),
+   msg:`R65 Subdivision สำคัญ:
+
+  R65.0 = SIRS ไม่ติดเชื้อ ไม่มี Organ failure
+  R65.1 = SIRS ไม่ติดเชื้อ มี Organ failure
+  R65.2 = Severe Sepsis (ติดเชื้อ + Organ failure)
+  R65.9 = SIRS ไม่ระบุ
+
+⚠️ R65.0/R65.2 ต้องมีรหัส Organ failure (J96/N17/K72/I50)
+⚠️ ถ้าเป็น Sepsis ให้ A41.x เป็น PDx + R65.2 เป็น SDx`},
+
+  {id:"PA11",sev:"medium",
+   title:"🔶 F10-F19 สารเสพติด — ตรวจสอบ Subdivision (CR44_1)",
+   trigger:(p,s,o)=>/^F1[0-9]/.test(p),
+   msg:`กลุ่ม F10-F19 Subdivision สำคัญ:
+
+  .0 = Acute intoxication (เมาเฉียบพลัน)
+  .1 = Harmful use
+  .2 = Dependence syndrome (ติด)
+  .3 = Withdrawal state (ถอน)
+  .4 = Withdrawal with delirium
+  .5 = Psychotic disorder
+
+📌 เลือก Subdivision ตามอาการที่ Admit เข้ามา`},
+
+  {id:"PA12",sev:"high",
+   title:"⚠️ M72.6 Necrotizing fasciitis — ตรวจสอบรหัส Debridement (CR19)",
+   trigger:(p,s,o)=>[p,...s].some(x=>x.startsWith("M72.6")||x.replace(/\./g,"").startsWith("M726")),
+   msg:`M72.6 (Necrotizing fasciitis) ต้องมีรหัสหัตถการ Debridement:
+
+  86.22 = Excisional debridement of wound
+  86.28 = Nonexcisional debridement
+  86.60-86.69 = Free skin graft (ถ้ามีการ graft)
+
+⚠️ ถ้าไม่มีรหัส Debridement จะถูกปฏิเสธการจ่าย (CR19)
+📌 Necrotizing fasciitis ต้องผ่าตัด — ถ้าไม่ได้ผ่าตัดควรทบทวนการวินิจฉัย`},
+
+  {id:"PA13",sev:"medium",
+   title:"🔶 I25.9 IHD — ไม่ระบุ Subdivision (CR45)",
+   trigger:(p,s,o)=>ck([p],"I25.9"),
+   msg:`I25.9 (Chronic IHD unspecified) ควรระบุให้ชัดเจน:
+
+  I25.10  = Atherosclerotic HD (native vessel)
+  I25.110 = With unstable angina
+  I25.2   = Previous MI (ประวัติ AMI เก่า)
+  I25.5   = Ischaemic cardiomyopathy
+
+📌 ระบุให้ชัดเจนเพื่อ DRG ที่ถูกต้อง`},
+
+  {id:"PA14",sev:"medium",
+   title:"🔶 N18.9 CKD ไม่ระบุระยะ + Diabetic nephropathy (EA10)",
+   trigger:(p,s,o,ln,d)=>ck([p,...s],"N18.9")&&
+            [p,...s].some(x=>/^E1[0-4][\.2]/.test(x)||/^E1[0-4]2/.test(x.replace(/\./g,""))),
+   msg:`N18.9 ร่วมกับ Diabetic nephropathy ควรระบุระยะ CKD:
+
+  N18.1 = CKD Stage 1 (GFR ≥ 90)
+  N18.2 = CKD Stage 2 (GFR 60-89)
+  N18.3 = CKD Stage 3 (GFR 30-59)
+  N18.4 = CKD Stage 4 (GFR 15-29)
+  N18.5 = CKD Stage 5 / ESRD (GFR < 15)
+
+📌 ตรวจสอบผล Creatinine/GFR`},
+
+  // ── Discharge status alerts ──
+  {id:"PA15",sev:"high",
+   title:"⚠️ COPD จำหน่าย 'หาย' — เสี่ยง DENY (CR13_1)",
+   trigger:(p,s,o,ln,d)=>ck([p],"J44")&&d==="1",
+   msg:`COPD (J44.x) จำหน่ายด้วย status "หาย (Recovered)" จะถูกปฏิเสธ
+
+โรค COPD เป็นโรคเรื้อรัง ไม่มีการหาย
+Discharge Status ที่เหมาะสม:
+  2 = ดีขึ้น (Improved)     ← ใช้บ่อยที่สุด
+  3 = ไม่ดีขึ้น (Not improved)
+  5 = ส่งต่อ (Referred)
+
+📌 แก้ Discharge Status เป็น "ดีขึ้น" ก่อนส่งเบิก`},
+
+  {id:"PA16",sev:"high",
+   title:"⚠️ DM/HTN/CKD จำหน่าย 'หาย' — เสี่ยง DENY",
+   trigger:(p,s,o,ln,d)=>d==="1"&&
+            [p,...s].some(x=>ck([x],"E10")||ck([x],"E11")||ck([x],"I10")||ck([x],"N18")),
+   msg:`โรคเรื้อรัง (DM/HTN/CKD) จำหน่ายด้วย "หาย" จะถูกตรวจสอบ
+
+โรคเรื้อรังที่ไม่ควรจำหน่ายเป็น "หาย":
+  E10/E11 = Diabetes mellitus
+  I10-I13 = Hypertension
+  N18      = Chronic kidney disease (CKD)
+  J44      = COPD
+  I50      = Heart failure
+
+Discharge Status ที่เหมาะสม:
+  2 = ดีขึ้น (Improved)
+  3 = ไม่ดีขึ้น (Not improved)
+
+📌 "หาย" สำหรับโรคติดเชื้อหรือโรคเฉียบพลันเท่านั้น`},
+
+  {id:"PA17",sev:"high",
+   title:"⚠️ LAMA (หนีกลับ) — ต้องบันทึกในเวชระเบียน",
+   trigger:(p,s,o,ln,d)=>d==="6",
+   msg:`Discharge Status "6 — หนีกลับ (LAMA)" ต้องการเอกสารครบถ้วน:
+
+สิ่งที่ต้องบันทึก:
+  ✓ แบบฟอร์ม LAMA ที่ผู้ป่วย/ญาติลงชื่อ
+  ✓ เหตุผลที่ผู้ป่วยปฏิเสธการรักษา
+  ✓ การให้ข้อมูลความเสี่ยงแก่ผู้ป่วย/ญาติ
+  ✓ วัน/เวลาที่ออกจากโรงพยาบาล
+
+⚠️ กรณี LAMA อาจถูกตรวจสอบ RW สูงผิดปกติ
+📌 LAMA ไม่จ่ายค่ารักษาเต็มจำนวนในบางกรณี`},
+
+  {id:"PA18",sev:"high",
+   title:"⚠️ ผู้ป่วยเสียชีวิต (Died) — ตรวจสอบรหัสสาเหตุตาย",
+   trigger:(p,s,o,ln,d)=>d==="4",
+   msg:`Discharge Status "4 — ตาย (Died)" ต้องมีรหัสสาเหตุการตายที่ถูกต้อง:
+
+สิ่งที่ต้องตรวจสอบ:
+  ✓ PDx ต้องเป็นสาเหตุการตายโดยตรง
+  ✓ ถ้าตายใน 48 ชม. แรก → ตรวจสอบ Admit Dx ว่าสอดคล้อง
+  ✓ ใบมรณบัตร (Death certificate) ต้องสอดคล้องกับ ICD-10
+
+รหัสที่ต้องระวัง:
+  R99 = Unknown cause of death (ไม่ควรใช้ถ้าทราบสาเหตุ)
+  R96 = Sudden death (ตรวจสอบว่ามี autopsy หรือไม่)
+
+📌 LOS < 24 ชม. + เสียชีวิต → จะถูกตรวจสอบพิเศษ`},
+
+  {id:"PA19",sev:"medium",
+   title:"🔶 ส่งต่อนอกเครือข่าย — ตรวจสอบเหตุผล",
+   trigger:(p,s,o,ln,d,hl)=>d==="5"&&hl==="2",
+   msg:`ส่งต่อ (Referred) นอกเครือข่าย ต้องมีเหตุผลที่ชัดเจน:
+
+เหตุผลที่ยอมรับได้:
+  ✓ ไม่มีแพทย์เชี่ยวชาญในโรงพยาบาล
+  ✓ ต้องการเครื่องมือพิเศษ
+  ✓ ผู้ป่วยขอย้ายเอง (บันทึกในเวชระเบียน)
+
+สิ่งที่ต้องบันทึก:
+  ✓ เหตุผลการส่งต่อ
+  ✓ ชื่อโรงพยาบาลที่ส่งต่อ
+  ✓ สภาพผู้ป่วยก่อนส่งต่อ
+
+📌 สปสช. อาจตรวจสอบการส่งต่อนอกเครือข่ายที่มี RW สูง`},
+
+  {id:"PA20",sev:"medium",
+   title:"🔶 LOS สั้น + Not improved — ตรวจสอบความเหมาะสม",
+   trigger:(p,s,o,ln,d)=>d==="3"&&ln!==null&&ln<=2,
+   msg:`"ไม่ดีขึ้น" ร่วมกับ LOS ≤ 2 วัน อาจถูกตรวจสอบ:
+
+คำถามที่ต้องตอบได้:
+  ✓ ทำไมจำหน่ายถ้าอาการยังไม่ดีขึ้น?
+  ✓ มีการปรึกษาแพทย์ก่อนจำหน่ายหรือไม่?
+  ✓ นัดติดตามอาการหรือไม่?
+
+สถานการณ์ที่ยอมรับได้:
+  - ผู้ป่วยปฏิเสธการรักษาต่อ (ควรใช้ LAMA แทน)
+  - โรคที่ไม่ตอบสนองต่อการรักษา (บันทึกเหตุผล)
+  - จำหน่ายไปดูแลแบบประคับประคอง
+
+📌 บันทึกเหตุผลการจำหน่ายให้ชัดเจนในเวชระเบียน`},
+];
+
+function getAlerts(pdx, sdxList, ops, los, dchtype, typehosp){
+  let p=pdx.toUpperCase(), s=sdxList.map(x=>x.toUpperCase()), o=ops;
+  let d=dchtype||"", hl=typehosp||"", ln=los||0;
+  return ALERTS.filter(a=>{ try{ return a.trigger(p,s,o,ln,d,hl); }catch(e){ return false; } });
+}
+
+// ════════════════════════════════════════════════════
+// NORMALIZE ICD CODES
+// ICD-10: ถ้าไม่มีจุดและความยาว > 3 → แทรกจุดหลังตัวที่ 3
+//   A099  → A09.9   M726  → M72.6   N390  → N39.0
+// ICD-9-CM: ถ้าตัวเลขล้วนและ > 2 หลัก → แทรกจุดหลังตัวที่ 2
+//   9904  → 99.04   3121  → 31.21   0066  → 00.66
+// ════════════════════════════════════════════════════
+function normalizeICD10(code){
+  code = code.trim().toUpperCase();
+  if(!code) return code;
+  // ถ้ามีจุดอยู่แล้ว ไม่ต้องแปลง
+  if(code.includes(".")) return code;
+  // ต้องขึ้นต้นด้วยตัวอักษร (ICD-10 pattern)
+  if(code.length > 3 && /^[A-Z]/.test(code)){
+    code = code.slice(0,3) + "." + code.slice(3);
+  }
+  return code;
+}
+function normalizeICD9(code){
+  code = code.trim();
+  if(!code) return code;
+  // ICD-9-CM อาจพิมพ์ไม่มีจุด เช่น 9904 → 99.04
+  if(!code.includes(".") && /^\d{3,}$/.test(code)){
+    code = code.slice(0,2) + "." + code.slice(2);
+  }
+  return code;
+}
+
+// ════════════════════════════════════════════════════
+// DYNAMIC FIELDS — SDx สูงสุด 12 ช่อง / Operation สูงสุด 10 ช่อง
+// เริ่มแสดงน้อยช่อง แล้วกดปุ่ม + เพิ่มทีละช่อง
+// ════════════════════════════════════════════════════
+const MAX_SDX = 12, INIT_SDX = 2;
+const MAX_OP  = 10, INIT_OP  = 2;
+
+function renumberFields(container, prefix, label){
+  [...container.children].forEach((div,i)=>{
+    div.querySelector("label").textContent = `${label} ${i+1}`;
+    div.querySelector("input").id = prefix + (i+1);
+    div.querySelector("input").placeholder = div.querySelector("input").dataset.ph || `${label}${i+1}`;
+  });
+}
+
+function makeField(container, prefix, label, placeholder, removable){
+  const div = document.createElement("div");
+  div.className = "field-group field-wrap";
+  div.innerHTML = `<label></label><input data-ph="${placeholder}" autocomplete="off">` +
+    (removable ? `<button class="btn-remove" type="button" title="ลบช่องนี้" tabindex="-1">✕</button>` : "");
+  container.appendChild(div);
+  if(removable){
+    div.querySelector(".btn-remove").onclick = ()=>{
+      div.remove();
+      renumberFields(container, prefix, label);
+      updateAddButtons();
+    };
+  }
+  renumberFields(container, prefix, label);
+  return div.querySelector("input");
+}
+
+function addSdx(focus){
+  const c = document.getElementById("sdx-container");
+  if(c.children.length >= MAX_SDX) return;
+  const inp = makeField(c, "sdx", "SDx", "รหัส ICD-10", c.children.length >= INIT_SDX);
+  updateAddButtons();
+  if(focus) inp.focus();
+}
+
+function addOp(focus){
+  const c = document.getElementById("op-container");
+  if(c.children.length >= MAX_OP) return;
+  const ph = c.children.length === 0 ? "เช่น 38.48, 96.04, 00.66" : "รหัส ICD-9-CM";
+  const inp = makeField(c, "op", "Operation", ph, c.children.length >= INIT_OP);
+  updateAddButtons();
+  if(focus) inp.focus();
+}
+
+function updateAddButtons(){
+  const sc = document.getElementById("sdx-container").children.length;
+  const oc = document.getElementById("op-container").children.length;
+  const bs = document.getElementById("btn-add-sdx");
+  const bo = document.getElementById("btn-add-op");
+  bs.disabled = sc >= MAX_SDX;
+  bs.textContent = sc >= MAX_SDX ? `SDx ครบ ${MAX_SDX} ช่องแล้ว` : `＋ เพิ่ม SDx (${sc}/${MAX_SDX})`;
+  bo.disabled = oc >= MAX_OP;
+  bo.textContent = oc >= MAX_OP ? `Operation ครบ ${MAX_OP} ช่องแล้ว` : `＋ เพิ่ม Operation (${oc}/${MAX_OP})`;
+}
+
+function initFields(){
+  document.getElementById("sdx-container").innerHTML = "";
+  document.getElementById("op-container").innerHTML = "";
+  for(let i=0;i<INIT_SDX;i++) addSdx(false);
+  for(let i=0;i<INIT_OP;i++) addOp(false);
+}
+
+// ════════════════════════════════════════════════════
+// MAIN CALCULATE
+// ════════════════════════════════════════════════════
+function calculate(){
+  let pdxRaw = document.getElementById("pdx").value.trim();
+  if(!pdxRaw){ alert("กรุณาใส่ PDx (ICD-10)"); return; }
+  let pdx = normalizeICD10(pdxRaw);
+  document.getElementById("pdx").value = pdx;
+  let sdxInputs = [...document.querySelectorAll("#sdx-container input")];
+  sdxInputs.forEach(el=>{ el.value = normalizeICD10(el.value); });
+  let sdxList = sdxInputs.map(el=>el.value.trim()).filter(Boolean);
+  let opInputs = [...document.querySelectorAll("#op-container input")];
+  opInputs.forEach(el=>{ el.value = normalizeICD9(el.value); });
+  let ops = opInputs.map(el=>el.value.trim()).filter(Boolean);
+  let los      = parseInt(document.getElementById("los").value)||null;
+  let dchtype  = document.getElementById("dchtype").value;   // "1"=หาย "2"=ดีขึ้น "3"=ไม่ดีขึ้น "4"=ตาย "5"=ส่งต่อ "6"=LAMA
+  let typehosp = document.getElementById("typehosp").value;  // "1"=ในเครือ "2"=นอกเครือ
+
+  let mdc  = getMDC(pdx, ops);
+  let [mdcName, mdcIcon] = MDC_INFO[mdc]||["อื่นๆ","📋"];
+  let orProc = isOR(ops);
+  let {mccs, ccs} = classifyCCMCC(sdxList);
+  let {name:drgName, rw, lvl} = getDRG(mdc, pdx, !!orProc, mccs, ccs);
+
+  // Outlier
+  let outlier="";
+  if(los!==null){
+    if(los<=1) outlier="⚡ Short stay (≤1 วัน) — อาจถูกปฏิเสธ";
+    else if(rw>0 && los>rw*12) outlier="📈 อาจเป็น Long stay outlier";
+  }
+
+  // Discharge status label
+  const dchLabel = {
+    "1":"1 — หาย (Recovered)","2":"2 — ดีขึ้น (Improved)",
+    "3":"3 — ไม่ดีขึ้น (Not improved)","4":"4 — ตาย (Died)",
+    "5":"5 — ส่งต่อ (Referred)","6":"6 — หนีกลับ (LAMA)",
+    "7":"7 — ครบกำหนด","8":"8 — อื่นๆ"
+  };
+  const dchColor = {"1":"#16a34a","2":"#2563eb","3":"#d97706","4":"#dc2626","5":"#7c3aed","6":"#dc2626"};
+  const typLabel = {"1":"1 — ในเครือข่าย","2":"2 — นอกเครือข่าย"};
+
+  // RW color
+  let rwClass = rw>4?"rb-red":(rw>2?"rb-amber":"rb-green");
+
+  // Render result
+  document.getElementById("result-area").innerHTML = `
+    <div class="drg-result">
+      <div class="res-box rb-blue wide">
+        <div class="rb-label">MDC (Major Diagnostic Category)</div>
+        <div class="rb-val">${mdcIcon} MDC ${mdc} — ${mdcName}</div>
+      </div>
+      <div class="res-box ${orProc?"rb-purple":"rb-gray"}">
+        <div class="rb-label">ประเภท</div>
+        <div class="rb-val">${orProc?"🔪 Surgical<br><small style='font-weight:400;font-size:13px'>${orProc}</small>":"💊 Medical"}</div>
+      </div>
+      <div class="res-box ${lvl==="MCC"?"rb-red":lvl==="CC"?"rb-amber":"rb-gray"}">
+        <div class="rb-label">CC / MCC</div>
+        <div class="rb-val">${lvl?`<span class="tag tag-${lvl.toLowerCase()}">${lvl}</span>`:`<span class="tag tag-none">ไม่มี</span>`}</div>
+      </div>
+      <div class="res-box rb-blue wide">
+        <div class="rb-label">กลุ่ม DRG (ประมาณการ)</div>
+        <div class="rb-val">📊 ${drgName}</div>
+      </div>
+      <div class="res-box ${rwClass} wide" style="text-align:center">
+        <div class="rb-label">RW ประมาณการ</div>
+        <div class="rb-val rw-big">≈ ${rw.toFixed(3)}</div>
+      </div>
+      ${mccs.length?`<div class="res-box rb-red wide"><div class="rb-label">MCC Codes</div><div class="rb-val" style="font-size:14px">${mccs.map(c=>`<span class="tag tag-mcc">${c}</span>`).join("")}</div></div>`:""}
+      ${ccs.length?`<div class="res-box rb-amber wide"><div class="rb-label">CC Codes</div><div class="rb-val" style="font-size:14px">${ccs.slice(0,6).map(c=>`<span class="tag tag-cc">${c}</span>`).join("")}${ccs.length>6?"…":""}</div></div>`:""}
+      ${outlier?`<div class="res-box rb-amber wide"><div class="rb-label">Outlier / Short stay</div><div class="rb-val" style="font-size:15px">${outlier}</div></div>`:""}
+      ${dchtype?`<div class="res-box wide" style="background:#f8fafc"><div class="rb-label">Discharge Status</div><div class="rb-val" style="font-size:15px;color:${dchColor[dchtype]||'#374151'}">${dchLabel[dchtype]||dchtype}</div></div>`:""}
+      ${typehosp?`<div class="res-box wide" style="background:#f8fafc"><div class="rb-label">ประเภทโรงพยาบาล</div><div class="rb-val" style="font-size:15px;color:#374151">${typLabel[typehosp]||typehosp}</div></div>`:""}
+    </div>`;
+
+  // Alerts
+  let triggered = getAlerts(pdx, sdxList, ops, los, dchtype, typehosp);
+  let ahtml = "";
+  if(!triggered.length){
+    ahtml = `<div class="alert-ok">✅ ไม่พบความเสี่ยง DENY CODE จากรหัสที่ให้<br><small>ยังควรตรวจสอบความถูกต้องของรหัสก่อนส่งเบิก</small></div>`;
+  } else {
+    ahtml += `<div style="font-size:14px;color:#64748b;margin-bottom:10px">⚠️ พบ <strong style="color:#dc2626">${triggered.length} รายการ</strong> ที่ควรทบทวนก่อนส่งเบิก</div>`;
+    for(let a of triggered){
+      ahtml += `
+        <div class="alert-item alert-${a.sev}">
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-body">${a.msg}</div>
+        </div>`;
+    }
+  }
+  document.getElementById("alerts-area").innerHTML = ahtml;
+  // Switch to alerts tab
+  switchTab("alerts");
+}
+
+function clearAll(){
+  ["pdx","age","los"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  initFields();
+  document.getElementById("dchtype").value="";
+  document.getElementById("typehosp").value="";
+  document.getElementById("result-area").innerHTML = `<div class="placeholder"><div class="big">🏥</div>กรอกข้อมูลและกด <strong>คำนวณ DRG</strong><br>เพื่อดู MDC · DRG · RW · CC/MCC</div>`;
+  document.getElementById("alerts-area").innerHTML = `<div class="alert-empty">กดคำนวณ DRG เพื่อดูการแจ้งเตือน</div>`;
+}
+
+function switchTab(tab){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add("active");
+  document.getElementById("tab-"+tab).classList.add("active");
+}
+
+// Build MDC reference table
+window.onload = function(){
+  initFields();
+  const rows = Object.entries(MDC_INFO).map(([k,[n,ic]])=>{
+    const icdMap = {
+      0:"Ventilator ≥96h / Transplant",
+      1:"G00-G99",2:"H00-H59",3:"H60-H99, J00-J06, J30-J39",
+      4:"J09-J29, J40-J99",5:"I00-I99",6:"K20-K67",
+      7:"K70-K87",8:"M00-M99",9:"L00-L99",
+      10:"E00-E90",11:"N00-N39",12:"N40-N65",13:"N60-N99",
+      14:"O00-O99",15:"P00-P96, Z38",16:"D50-D89",
+      17:"C00-D49",18:"A00-B99",19:"F20-F99",
+      20:"F10-F19",21:"S00-T98, V01-Y98",22:"T20-T32",
+      23:"R, Z, Q",24:"B20-B24"
+    };
+    return `<tr style="border-bottom:1px solid #f1f5f9">
+      <td style="padding:5px 8px;border:1px solid #e2e8f0;font-weight:700">${ic} MDC ${k}</td>
+      <td style="padding:5px 8px;border:1px solid #e2e8f0">${n}</td>
+      <td style="padding:5px 8px;border:1px solid #e2e8f0;color:#64748b;font-size:13px">${icdMap[k]||""}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("mdc-table").innerHTML = rows;
+
+  // Enter key
+  document.addEventListener("keydown", e=>{ if(e.key==="Enter"&&e.target.tagName==="INPUT") calculate(); });
+};
+</script>
+</body>
+</html>
