@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ — DRG Grouper</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,'TH Sarabun New',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a,#1e3a8a 60%,#0f766e);padding:16px}
+.card{background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:38px 34px;width:100%;max-width:400px}
+.logo{text-align:center;font-size:44px;margin-bottom:8px}
+h1{text-align:center;font-size:20px;color:#0f172a;margin-bottom:4px}
+.sub{text-align:center;font-size:13px;color:#64748b;margin-bottom:26px}
+label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px}
+input{width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;transition:.15s;margin-bottom:16px}
+input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}
+button{width:100%;padding:13px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{background:#1d4ed8}
+button:disabled{opacity:.5;cursor:not-allowed}
+.err{background:#fee2e2;color:#b91c1c;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;display:none}
+.note{text-align:center;font-size:12px;color:#94a3b8;margin-top:18px}
+</style>
+</head>
+<body>
+<form class="card" id="loginForm">
+  <div class="logo">🏥</div>
+  <h1>DRG Grouper</h1>
+  <div class="sub">เข้าสู่ระบบด้วยบัญชีผู้ใช้ของโรงพยาบาล</div>
+  <div class="err" id="err"></div>
+  <label for="username">ชื่อผู้ใช้</label>
+  <input id="username" autocomplete="username" required autofocus>
+  <label for="password">รหัสผ่าน</label>
+  <input id="password" type="password" autocomplete="current-password" required>
+  <button id="btn" type="submit">เข้าสู่ระบบ</button>
+  <div class="note">ใช้บัญชีเดียวกับระบบรายงานของโรงพยาบาล (ppchos)</div>
+</form>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn');
+  const err = document.getElementById('err');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok) { location.href = '/'; return; }
+    err.textContent = r.status === 429
+      ? (data.error || 'พยายามบ่อยเกินไป กรุณารอสักครู่')
+      : 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+    err.style.display = 'block';
+  } catch {
+    err.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+});
+</script>
+</body>
+</html>
