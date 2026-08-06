@@ -10,6 +10,7 @@ const IC = {
   activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
   calc: '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
   shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  steth: '<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
 };
 
 
@@ -118,6 +119,25 @@ export default function Home() {
           </p>
           <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
             เริ่มตรวจเลย →
+          </div>
+        </a>
+
+        <a
+          href="/tools/rw"
+          style={card}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
+        >
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.steth} size={26} /></div>
+          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
+            ประเมิน RW โหมดแพทย์
+          </h2>
+          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
+            สำหรับแพทย์หน้างาน — พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษได้เลย
+            ระบบแปลงเป็น ICD-10 แล้วประเมิน DRG กับ RW ให้ทันที
+          </p>
+          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
+            เริ่มประเมินเลย →
           </div>
         </a>
       </div>
