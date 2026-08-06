@@ -2,20 +2,30 @@
 
 import { useState } from "react";
 
+const mint = {
+  bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
+  ink: "#134e4a",
+  soft: "#5eead4",
+  teal: "#0d9488",
+  tealDark: "#0f766e",
+  sub: "#428f87",
+};
+
 const styles = {
   wrap: {
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg,#0f172a,#1e3a8a 60%,#0f766e)",
-    fontFamily: "'Segoe UI', Tahoma, 'TH Sarabun New', sans-serif",
+    background: mint.bg,
+    fontFamily: "'Prompt', sans-serif",
     padding: 16,
   },
   card: {
-    background: "#fff",
-    borderRadius: 18,
-    boxShadow: "0 20px 60px rgba(0,0,0,.35)",
+    background: "rgba(255,255,255,.9)",
+    borderRadius: 22,
+    border: "1.5px solid #ccfbf1",
+    boxShadow: "0 12px 40px rgba(13,148,136,.14)",
     padding: "38px 34px",
     width: "100%",
     maxWidth: 400,
@@ -24,28 +34,32 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
     padding: "12px 14px",
-    border: "2px solid #e2e8f0",
-    borderRadius: 10,
+    border: "1.5px solid #99f6e4",
+    borderRadius: 12,
     fontSize: 15,
     outline: "none",
     marginBottom: 16,
+    fontFamily: "inherit",
+    background: "#fdfefe",
+    color: mint.ink,
   },
   btn: {
     width: "100%",
     padding: 13,
     border: "none",
-    borderRadius: 10,
-    background: "#2563eb",
+    borderRadius: 12,
+    background: mint.teal,
     color: "#fff",
     fontSize: 15,
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: "pointer",
+    fontFamily: "inherit",
   },
   label: {
     display: "block",
     fontSize: 13,
-    fontWeight: 600,
-    color: "#334155",
+    fontWeight: 500,
+    color: mint.tealDark,
     marginBottom: 6,
   },
 };
@@ -73,11 +87,11 @@ export default function LoginPage() {
       }
       setError(
         r.status === 429
-          ? data.error || "พยายามบ่อยเกินไป กรุณารอสักครู่"
-          : "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+          ? data.error || "ลองบ่อยไปนิดนึง พักสักครู่แล้วลองใหม่นะ"
+          : "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง ลองอีกครั้งนะ",
       );
     } catch {
-      setError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่");
+      setError("ต่อเซิร์ฟเวอร์ไม่ติด ลองใหม่อีกครั้งนะ");
     } finally {
       setBusy(false);
     }
@@ -86,19 +100,28 @@ export default function LoginPage() {
   return (
     <div style={styles.wrap}>
       <form style={styles.card} onSubmit={submit}>
-        <div style={{ textAlign: "center", fontSize: 44, marginBottom: 8 }}>🏥</div>
-        <h1 style={{ textAlign: "center", fontSize: 20, color: "#0f172a", margin: "0 0 4px" }}>
-          PPC Coding Tools
+        <div style={{ textAlign: "center", fontSize: 46, marginBottom: 6 }}>🌿</div>
+        <h1
+          style={{
+            textAlign: "center",
+            fontSize: 21,
+            color: mint.ink,
+            margin: "0 0 4px",
+            fontWeight: 600,
+          }}
+        >
+          ยินดีต้อนรับกลับมา 👋
         </h1>
-        <div style={{ textAlign: "center", fontSize: 13, color: "#64748b", marginBottom: 26 }}>
-          DRG Grouper + Deny Code Checker — เข้าสู่ระบบด้วยบัญชีโรงพยาบาล
+        <div style={{ textAlign: "center", fontSize: 13.5, color: mint.sub, marginBottom: 26 }}>
+          เข้าสู่ระบบก่อน แล้วไปเช็ก DRG กับ Deny Code กันเลย
         </div>
         {error && (
           <div
             style={{
-              background: "#fee2e2",
-              color: "#b91c1c",
-              borderRadius: 8,
+              background: "#fff1f2",
+              color: "#be123c",
+              border: "1px solid #fecdd3",
+              borderRadius: 10,
               padding: "10px 12px",
               fontSize: 13,
               marginBottom: 14,
@@ -127,11 +150,11 @@ export default function LoginPage() {
           autoComplete="current-password"
           required
         />
-        <button style={styles.btn} disabled={busy} type="submit">
-          {busy ? "กำลังตรวจสอบ…" : "เข้าสู่ระบบ"}
+        <button style={{ ...styles.btn, opacity: busy ? 0.6 : 1 }} disabled={busy} type="submit">
+          {busy ? "แป๊บนึงนะ กำลังตรวจสอบ…" : "เข้าสู่ระบบ"}
         </button>
-        <div style={{ textAlign: "center", fontSize: 12, color: "#94a3b8", marginTop: 18 }}>
-          ใช้บัญชีเดียวกับระบบรายงานของโรงพยาบาล (ppchos)
+        <div style={{ textAlign: "center", fontSize: 12.5, color: "#7fb5ae", marginTop: 18 }}>
+          ใช้บัญชีเดียวกับระบบรายงานของโรงพยาบาลได้เลย ไม่ต้องสมัครใหม่
         </div>
       </form>
     </div>

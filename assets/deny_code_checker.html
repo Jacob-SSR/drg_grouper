@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Denile code checker program BY Dr.OraPat</title>
+<title>ตรวจรหัสเสี่ยงโดนปฏิเสธ (Deny Code) — PPC Coding Tools</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -54,11 +54,53 @@ tr:hover td{background:#ebf8ff}
 .detail-list li{margin-bottom:2px;list-style:none;padding-left:10px;position:relative}
 .detail-list li::before{content:"→";position:absolute;left:0;color:#a0aec0}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style id="mint-theme">
+/* ═══ ธีมมิ้นต์พาสเทล + ฟอนต์ Prompt (override ธีมเดิมทั้งหน้า) ═══ */
+body{font-family:'Prompt',sans-serif;background:linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%);color:#134e4a}
+header{background:linear-gradient(135deg,#99f6e4 0%,#a7f3d0 100%);color:#115e59}
+header h1{font-weight:600}
+header h1 span{color:#0f766e}
+.badge{background:#0d9488}
+header a,header button{color:#0f766e !important;border:1.5px solid #5eead4 !important;background:rgba(255,255,255,.65) !important;font-family:inherit}
+header #user-name{color:#115e59}
+
+.upload-zone{border-color:#5eead4;border-radius:18px;background:rgba(255,255,255,.85)}
+.upload-zone:hover{border-color:#0d9488;background:#f0fdfa}
+.upload-zone h2{color:#115e59}
+.upload-zone p{color:#428f87}
+
+.bar{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
+.bar input,.bar select{border-color:#99f6e4;border-radius:10px;background:#fdfefe;color:#134e4a;font-family:inherit}
+.bar input:focus,.bar select:focus{border-color:#14b8a6}
+
+.btn{font-family:inherit;border-radius:10px}
+.btn-primary{background:#0d9488}.btn-primary:hover{background:#0f766e}
+.btn-blue{background:#14b8a6}.btn-blue:hover{background:#0d9488}
+.btn-green{background:#10b981}.btn-green:hover{background:#059669}
+.btn-gray{background:#f0fdfa;color:#0f766e}.btn-gray:hover{background:#ccfbf1}
+
+.stat{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
+.stat .lbl{color:#428f87}
+.s-total .num{color:#115e59}
+
+table{border-radius:14px;box-shadow:0 6px 20px rgba(13,148,136,.08)}
+th{background:#ccfbf1;color:#115e59}
+td{border-bottom:1px solid #ecfdf5}
+tr:hover td{background:#f0fdfa}
+
+.col-map{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
+.col-map h3{color:#115e59}
+.col-map label{color:#428f87}
+.col-map select{border-color:#99f6e4;border-radius:8px;font-family:inherit}
+</style>
 </head>
 <body>
 <header>
   <div>🔍</div>
-  <h1>Denile code checker program <span>By Dr.OraPat</span></h1>
+  <h1>ตรวจรหัสเสี่ยงโดนปฏิเสธ (Deny Code) <span>by Dr.OraPat</span></h1>
   <span class="badge">สปสช. AI Pre-Audit v2567</span>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.8rem">
     <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:.75rem;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
@@ -71,29 +113,29 @@ tr:hover td{background:#ebf8ff}
 
 <!-- HOSxP direct fetch -->
 <div class="bar" style="border:2px solid #0f766e;background:#f0fdfa">
-  <strong style="font-size:.9rem;color:#0f766e">📥 ดึงข้อมูลจริงจาก HOSxP</strong>
+  <strong style="font-size:.9rem;color:#0f766e">📥 ดึงเคสจริงจาก HOSxP มาตรวจ</strong>
   <label style="font-size:.8rem;color:#4a5568">วันที่จำหน่าย:</label>
   <input type="date" id="hosxp-start">
   <span style="color:#718096">ถึง</span>
   <input type="date" id="hosxp-end">
-  <button class="btn btn-green" id="hosxp-btn" onclick="fetchHosxpCases()">▶ ดึงและตรวจสอบทันที</button>
+  <button class="btn btn-green" id="hosxp-btn" onclick="fetchHosxpCases()">ตรวจให้เลย</button>
   <span id="hosxp-status" style="font-size:.8rem;color:#718096"></span>
 </div>
 
 <!-- Upload -->
 <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
   <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
-  <h2>📂 อัปโหลดไฟล์ Excel / CSV จาก HosXP</h2>
-  <p>คลิกหรือลากไฟล์มาวาง · รองรับ .xlsx .xls .csv</p>
-  <p style="margin-top:8px;color:#e94560;font-size:.8rem">deny_code_sample.xlsx หรือ Export จาก HosXP ได้เลย</p>
+  <h2>📂 หรืออัปโหลดไฟล์ Excel / CSV เองก็ได้</h2>
+  <p>คลิกหรือลากไฟล์มาวางตรงนี้ได้เลย · รองรับ .xlsx .xls .csv</p>
+  <p style="margin-top:8px;color:#0d9488;font-size:.8rem">ใช้ไฟล์ที่ Export จาก HOSxP ได้เลย ระบบจับคู่คอลัมน์ให้เอง</p>
 </div>
 
 <!-- Column mapping -->
 <div id="mappingSection" class="col-map">
-  <h3>🗺️ Column Mapping — ตรวจสอบและแก้ไขได้</h3>
+  <h3>🗺️ จับคู่คอลัมน์ให้แล้ว — แก้ได้ถ้าไม่ตรง</h3>
   <div class="grid" id="mappingGrid"></div>
   <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="runCheck()">▶ เริ่มตรวจสอบ</button>
+    <button class="btn btn-primary" onclick="runCheck()">เริ่มตรวจเลย</button>
     <button class="btn btn-gray" onclick="location.reload()">↺ โหลดใหม่</button>
   </div>
 </div>
@@ -101,10 +143,10 @@ tr:hover td{background:#ebf8ff}
 <!-- Results -->
 <div id="resultSection">
   <div class="stats">
-    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">ทั้งหมด</div></div>
-    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 ความเสี่ยงสูง</div></div>
-    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ความเสี่ยงกลาง</div></div>
-    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ผ่านการตรวจ</div></div>
+    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">เคสทั้งหมด</div></div>
+    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 เสี่ยงสูง รีบดูก่อน</div></div>
+    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ควรตรวจทาน</div></div>
+    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ไม่พบปัญหา</div></div>
   </div>
   <div class="bar">
     <input type="text" id="srch" placeholder="🔍 ค้นหา HN / AN / รหัส..." oninput="renderTable()" style="width:220px">
@@ -495,8 +537,8 @@ async function fetchHosxpCases(){
   const end   = document.getElementById('hosxp-end').value;
   const st    = document.getElementById('hosxp-status');
   const btn   = document.getElementById('hosxp-btn');
-  if(!start || !end){ st.textContent='กรุณาเลือกช่วงวันที่'; st.style.color='#e53e3e'; return; }
-  btn.disabled = true; st.style.color='#718096'; st.textContent='กำลังดึงข้อมูลจาก HOSxP…';
+  if(!start || !end){ st.textContent='อย่าลืมเลือกช่วงวันที่ก่อนนะ'; st.style.color='#e53e3e'; return; }
+  btn.disabled = true; st.style.color='#718096'; st.textContent='แป๊บนึงนะ กำลังดึงเคสจาก HOSxP…';
   try {
     const r = await fetch(`/api/hosxp/cases?start=${start}&end=${end}`);
     if(r.status===401){ location.href='/login'; return; }

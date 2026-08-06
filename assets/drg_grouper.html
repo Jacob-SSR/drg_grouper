@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRG Grouper จำลอง + แจ้งเตือนแพทย์ BY Dr.OraPat</title>
+<title>เช็ก DRG + RW ก่อนส่งเบิก — PPC Coding Tools</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'TH Sarabun New', Sarabun, sans-serif; font-size: 16px; background: #f1f5f9; color: #1e293b; }
@@ -117,13 +117,60 @@
   .diag-name { font-size: 13px; color: #374151; line-height: 1.4; }
   .diag-name small { color: #94a3b8; font-size: 11px; display: block; }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style id="mint-theme">
+  /* ═══ ธีมมิ้นต์พาสเทล + ฟอนต์ Prompt (override ธีมเดิมทั้งหน้า) ═══ */
+  body { font-family: 'Prompt', sans-serif; font-size: 15px; background: linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%); color: #134e4a; }
+
+  .header { background: linear-gradient(135deg,#99f6e4 0%,#a7f3d0 100%); color: #115e59; }
+  .header h1 { color: #115e59; font-weight: 600; }
+  .header h1 span { color: #0f766e !important; }
+  .header p { color: #0f766e; }
+  .header .warn-bar { background: #ecfdf5; border-top: 1px solid #99f6e4; color: #b45309; }
+  #user-bar a, #user-bar button {
+    color: #0f766e !important; border: 1.5px solid #5eead4 !important;
+    background: rgba(255,255,255,.65) !important; font-family: inherit;
+  }
+  #user-bar span { color: #115e59; }
+
+  .card { border-radius: 16px; border: 1.5px solid #ccfbf1; box-shadow: 0 6px 20px rgba(13,148,136,.08); }
+  .card-header { border-bottom: 1px solid #ccfbf1; color: #115e59; font-weight: 600; }
+
+  .field-group label { color: #0f766e; font-weight: 500; }
+  .field-group input, .field-group select { border-color: #99f6e4; border-radius: 10px; background: #fdfefe; color: #134e4a; }
+  .field-group input:focus, .field-group select:focus { border-color: #14b8a6; }
+  .section-label { color: #14b8a6; border-bottom: 1px solid #ccfbf1; }
+
+  .btn-calc { background: #0d9488; border-radius: 12px; font-weight: 600; }
+  .btn-calc:hover { background: #0f766e; }
+  .btn-clear { background: #f0fdfa; color: #0f766e; border-radius: 10px; }
+  .btn-clear:hover { background: #ccfbf1; }
+  #hosxp-btn { background: #0d9488 !important; border-radius: 10px !important; font-family: inherit; font-weight: 600 !important; }
+  #hosxp-btn:hover { background: #0f766e !important; }
+
+  .rb-blue { background: #f0fdfa; } .rb-blue .rb-val { color: #0f766e; }
+  .res-box { border-radius: 12px; }
+  .res-box .rb-label { color: #428f87; }
+
+  .tab-bar { border-bottom: 1px solid #ccfbf1; }
+  .tab-btn.active { color: #0d9488; border-bottom-color: #2dd4bf; background: #f0fdfa; }
+
+  .diag-dropdown { border-color: #2dd4bf; border-radius: 10px; }
+  .diag-item:hover { background: #f0fdfa; }
+  .diag-code { color: #0f766e; }
+
+  .note-bar { background: #ecfdf5; border-top: 1px solid #a7f3d0; color: #115e59; }
+  .alerts-scroll::-webkit-scrollbar-thumb { background: #99f6e4; }
+</style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🏥 DRG Grouper จำลอง + แจ้งเตือนแพทย์ <span style="font-size:15px;font-weight:400;opacity:.8">BY Dr.OraPat</span></h1>
-  <p>ประมาณการ MDC · DRG · RW · CC/MCC · แจ้งเตือน DENY CODE สำหรับแพทย์</p>
-  <div class="warn-bar">⚠️ ค่า RW เป็นประมาณการเพื่อการศึกษาเท่านั้น — ไม่ใช่ผล DRG Grouper อย่างเป็นทางการ (Thai DRG v6)</div>
+  <h1>🧮 เช็ก DRG และค่า RW ก่อนส่งเบิก <span style="font-size:15px;font-weight:400;opacity:.8">by Dr.OraPat</span></h1>
+  <p>ใส่เลข AN แล้วให้ระบบกรอกให้ หรือเลือกโรคเองก็ได้ — เดี๋ยวช่วยประเมินกลุ่ม DRG ค่า RW และชี้จุดที่เสี่ยงถูกตัดยอดให้</p>
+  <div class="warn-bar">💡 ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทานเท่านั้น ผลจริงยึดตาม Thai DRG Grouper ของ สปสช.</div>
   <div id="user-bar" style="position:absolute;top:14px;right:20px;display:flex;align-items:center;gap:10px;font-size:13px">
     <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
     <a href="/tools/deny" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🔍 Deny Code Checker</a>
@@ -136,24 +183,24 @@
   <!-- ─── INPUT PANEL ─── -->
   <div class="input-panel">
     <div class="card">
-      <div class="card-header">📋 กรอกข้อมูลผู้ป่วย</div>
+      <div class="card-header">📋 ข้อมูลผู้ป่วย</div>
       <div class="card-body">
 
         <!-- ── HOSXP FETCH ── -->
-        <div class="section-label" style="margin-top:0">📥 ดึงข้อมูลจริงจาก HOSxP (ระบุ AN)</div>
+        <div class="section-label" style="margin-top:0">📥 มีเลข AN? ให้ระบบกรอกให้อัตโนมัติ</div>
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:6px">
           <div class="field-group" style="flex:1;margin-bottom:0">
             <label>AN (เลขที่ Admit)</label>
             <input id="hosxp-an" placeholder="เช่น 680001234" inputmode="numeric" autocomplete="off">
           </div>
-          <button id="hosxp-btn" onclick="fetchFromHosxp()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">ดึงข้อมูล</button>
+          <button id="hosxp-btn" onclick="fetchFromHosxp()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">กรอกให้เลย</button>
         </div>
         <div id="hosxp-status" style="font-size:12px;color:#64748b;margin-bottom:10px"></div>
 
         <!-- ── DIAGNOSIS SEARCH ── -->
-        <div class="section-label" style="margin-top:0">🔍 ค้นหาจากชื่อโรค (แพทย์)</div>
+        <div class="section-label" style="margin-top:0">🔍 หรือค้นหาจากชื่อโรคก็ได้</div>
         <div class="field-group" style="position:relative">
-          <label>พิมพ์ชื่อโรคภาษาไทย / อังกฤษ</label>
+          <label>พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษก็ได้</label>
           <input id="diag-search" placeholder="เช่น ปอดอักเสบ, heart failure, เบาหวาน, sepsis…"
                  autocomplete="off" oninput="searchDiag(this.value,'pdx-list')" onfocus="searchDiag(this.value,'pdx-list')">
           <div id="pdx-list" class="diag-dropdown" style="display:none"></div>
@@ -10061,8 +10108,8 @@ async function fetchFromHosxp(){
   const an = document.getElementById("hosxp-an").value.trim();
   const st = document.getElementById("hosxp-status");
   const btn = document.getElementById("hosxp-btn");
-  if(!an){ st.textContent="กรุณาระบุ AN"; st.style.color="#dc2626"; return; }
-  btn.disabled = true; st.style.color="#64748b"; st.textContent="กำลังดึงข้อมูลจาก HOSxP…";
+  if(!an){ st.textContent="อย่าลืมใส่เลข AN ก่อนนะ"; st.style.color="#dc2626"; return; }
+  btn.disabled = true; st.style.color="#64748b"; st.textContent="แป๊บนึงนะ กำลังดึงข้อมูลจาก HOSxP…";
   try {
     const r = await fetch(`/api/hosxp/patient?an=${encodeURIComponent(an)}`);
     if(r.status===401){ location.href="/login"; return; }
