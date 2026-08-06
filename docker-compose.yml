@@ -7,7 +7,7 @@ services:
     container_name: ppc-coding-tools
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3500:3000"  # เข้าใช้ที่พอร์ต 3500 (ใน container ยังรัน 3000)
     # อ่าน env ตอน runtime จากไฟล์เดียวกับที่ build ใช้
     # (คัดลอกจาก .env.example → .env.production แล้วใส่ค่าจริงก่อน build)
     env_file:

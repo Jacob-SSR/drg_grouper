@@ -25,7 +25,7 @@ cp .env.example .env.production
 # 2) build + รัน
 docker compose up -d --build
 
-# เปิด http://<เครื่องนี้>:3000
+# เปิด http://<เครื่องนี้>:3500
 ```
 
 หมายเหตุ:
@@ -34,7 +34,7 @@ docker compose up -d --build
   (ไฟล์นี้ไม่ติดเข้า image สุดท้าย ใช้เป็น `env_file` ตอน runtime ผ่าน compose)
 - ถ้า MySQL HOSxP รันบนเครื่องเดียวกับ Docker ให้ใช้ `DB_HOST=host.docker.internal`
   (compose ตั้ง `host-gateway` ให้แล้ว) — ถ้าอยู่คนละเครื่องในวง LAN ใส่ IP จริงได้เลย
-- อัปเดตเวอร์ชัน: `git pull` แล้ว `docker compose up -d --build` ซ้ำ
+- อัปเดตเวอร์ชัน: `git pull` แล้ว `docker compose up -d --build` ซ้ำ (พอร์ตเข้าใช้: 3500)
 
 ## ติดตั้งแบบไม่ใช้ Docker
 
