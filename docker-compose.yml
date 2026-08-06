@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ppc-coding-tools:latest
+    container_name: ppc-coding-tools
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    # อ่าน env ตอน runtime จากไฟล์เดียวกับที่ build ใช้
+    # (คัดลอกจาก .env.example → .env.production แล้วใส่ค่าจริงก่อน build)
+    env_file:
+      - .env.production
+    # ให้ container เรียก MySQL ที่รันบน "เครื่อง host เดียวกัน" ผ่าน host.docker.internal ได้
+    # (ถ้า HOSxP อยู่คนละเครื่องในวง LAN ให้ใส่ IP จริงใน DB_HOST/DB_HOST2 แทน แล้วบรรทัดนี้ไม่จำเป็น)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

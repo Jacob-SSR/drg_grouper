@@ -16,7 +16,27 @@
 - `proxy.js` ล็อกทุกหน้า/ทุก API แบบ **deny by default** — route ใหม่ถูกล็อกอัตโนมัติ
 - `/api/change-password` เปลี่ยนรหัสผ่านได้เอง
 
-## ติดตั้ง
+## รันด้วย Docker
+
+```bash
+# 1) เตรียม env สำหรับ production (ใส่ IP ฐาน HOSxP + JWT_SECRET จริง)
+cp .env.example .env.production
+
+# 2) build + รัน
+docker compose up -d --build
+
+# เปิด http://<เครื่องนี้>:3000
+```
+
+หมายเหตุ:
+
+- `next build` ใน container อ่านค่าจาก `.env.production` — ไม่มีไฟล์นี้ build จะล้ม
+  (ไฟล์นี้ไม่ติดเข้า image สุดท้าย ใช้เป็น `env_file` ตอน runtime ผ่าน compose)
+- ถ้า MySQL HOSxP รันบนเครื่องเดียวกับ Docker ให้ใช้ `DB_HOST=host.docker.internal`
+  (compose ตั้ง `host-gateway` ให้แล้ว) — ถ้าอยู่คนละเครื่องในวง LAN ใส่ IP จริงได้เลย
+- อัปเดตเวอร์ชัน: `git pull` แล้ว `docker compose up -d --build` ซ้ำ
+
+## ติดตั้งแบบไม่ใช้ Docker
 
 ```bash
 npm install
