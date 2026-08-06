@@ -4,6 +4,7 @@
 // ให้เข้ากับ column mapping ของหน้า Deny Code Checker (autoDetect จับได้เลย)
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { cachedQuery } from "@/lib/cache";
 
 const MAX_RANGE_DAYS = 366; // กันดึงข้ามช่วงยาวเกินจน DB หนัก
 
@@ -33,7 +34,10 @@ export async function GET(req) {
       );
     }
 
-    const [rows] = await db.query(
+    // cache 5 นาที — ช่วงวันที่เดิมถูกกดซ้ำบ่อย (refresh หน้า/สลับตัวกรอง)
+    // ของเก่าแจกต่อได้ถึง 20 นาทีถ้า DB ช้า/ล่ม (ดู lib/cache.js)
+    const rows = await cachedQuery(["cases", start, end], async () => {
+      const [r] = await db.query(
       `SELECT i.an, i.hn, i.regdate, i.dchdate, i.dchtype, i.dchstts,
               i.adjrw AS rw,
               DATEDIFF(i.dchdate, i.regdate) AS los,
@@ -48,8 +52,10 @@ export async function GET(req) {
        FROM ipt i
        WHERE i.dchdate BETWEEN ? AND ?
        ORDER BY i.dchdate, i.an`,
-      [start, end],
-    );
+        [start, end],
+      );
+      return r;
+    }, 300);
 
     // แตก sdx / ops เป็นคอลัมน์แบน sdx1..sdx12, op1..op10
     const cases = rows.map((r) => {

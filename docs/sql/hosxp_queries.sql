@@ -39,3 +39,12 @@ SELECT DISTINCT c.icd9cm AS icd9
 FROM opitemrece o
 JOIN ipt_oper_code c ON c.icode = o.icode
 WHERE o.an = ? AND c.icd9cm IS NOT NULL AND c.icd9cm <> '';
+
+-- ── PERFORMANCE: index ที่ควรมี (HOSxP มาตรฐานมักมีอยู่แล้ว — เช็คด้วย SHOW INDEX) ──
+-- ทำให้ query ช่วงวันที่ของ Deny Code เร็วขึ้นมากถ้ายังไม่มี
+-- SHOW INDEX FROM ipt WHERE Column_name = 'dchdate';
+-- CREATE INDEX idx_ipt_dchdate ON ipt (dchdate);
+-- SHOW INDEX FROM iptdiag WHERE Column_name = 'an';
+-- CREATE INDEX idx_iptdiag_an ON iptdiag (an);
+-- SHOW INDEX FROM iptoprt WHERE Column_name = 'an';
+-- CREATE INDEX idx_iptoprt_an ON iptoprt (an);
