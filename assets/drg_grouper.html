@@ -188,6 +188,39 @@
   .btn-calc { background:#14b8a6; }
   .btn-calc:hover { background:#0d9488; }
 
+
+  /* ── Navbar มาตรฐาน + ฟอร์มแนวนอน + SVG icon ── */
+  .ico { fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-3px; flex-shrink:0 }
+  .topbar { position:sticky; top:0; z-index:100; height:60px; display:flex; align-items:center; gap:28px;
+    padding:0 24px; background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+    border-bottom:1.5px solid #ccfbf1; box-shadow:0 2px 12px rgba(13,148,136,.06); }
+  .brand { display:flex; align-items:center; gap:9px; color:#0f766e; font-weight:600; font-size:16px; text-decoration:none }
+  .nav-links { display:flex; gap:4px; }
+  .nav-links a { display:flex; align-items:center; gap:7px; padding:8px 14px; border-radius:10px;
+    color:#428f87; text-decoration:none; font-size:14px; font-weight:500; transition:.15s }
+  .nav-links a:hover { background:#f0fdfa; color:#0f766e }
+  .nav-links a.active { background:#ccfbf1; color:#0f766e; font-weight:600 }
+  .nav-right { margin-left:auto; display:flex; align-items:center; gap:14px }
+  .nav-user { display:flex; align-items:center; gap:7px; color:#115e59; font-size:13.5px }
+  .nav-logout { display:flex; align-items:center; gap:7px; background:#fff; border:1.5px solid #99f6e4;
+    color:#0f766e; border-radius:10px; padding:7px 14px; cursor:pointer; font-family:inherit; font-size:13px }
+  .nav-logout:hover { background:#f0fdfa }
+  .page-head { max-width:1400px; margin:20px auto 0; padding:0 20px }
+  .page-head h1 { font-size:22px; font-weight:600; color:#115e59 }
+  .page-head h1 span { font-size:13px; font-weight:400; color:#428f87 }
+  .page-head p { font-size:12.5px; color:#7fb5ae; margin-top:3px }
+
+  /* ฟอร์มแนวนอน: ก้อน section เรียง 4 คอลัมน์ ผลลัพธ์ 2 คอลัมน์ข้างล่าง */
+  .main { display:block }
+  .input-panel { width:auto; margin-bottom:20px }
+  .form-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px 28px; align-items:start }
+  .fcol { min-width:0 }
+  .fcol > .section-label:first-child { margin-top:0 }
+  .result-panel { display:grid; grid-template-columns:3fr 2fr; gap:20px; align-items:start }
+  .result-panel > .card { margin-bottom:0 !important }
+  @media(max-width:1150px){ .form-grid { grid-template-columns:1fr 1fr } .result-panel { grid-template-columns:1fr } }
+  @media(max-width:700px){ .form-grid { grid-template-columns:1fr } .topbar{gap:12px;overflow-x:auto} }
+
   /* empty state ไม่ต้องกินที่ */
   .placeholder { padding: 18px 16px; font-size: 13.5px; line-height: 1.8; }
   .placeholder .big { font-size: 26px; }
@@ -195,27 +228,34 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>🧮 เช็ก DRG และค่า RW ก่อนส่งเบิก <span style="font-size:15px;font-weight:400;opacity:.8">by Dr.OraPat</span></h1>
-  <p>ใส่เลข AN แล้วให้ระบบกรอกให้ หรือเลือกโรคเองก็ได้ — เดี๋ยวช่วยประเมินกลุ่ม DRG ค่า RW และชี้จุดที่เสี่ยงถูกตัดยอดให้</p>
-  <div class="warn-bar">💡 ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทานเท่านั้น ผลจริงยึดตาม Thai DRG Grouper ของ สปสช.</div>
-  <div id="user-bar" style="position:absolute;top:14px;right:20px;display:flex;align-items:center;gap:10px;font-size:13px">
-    <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
-    <a href="/tools/deny" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🔍 Deny Code Checker</a>
-    <span id="user-name" style="opacity:.9">👤 …</span>
-    <button onclick="doLogout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px">ออกจากระบบ</button>
+<nav class="topbar">
+  <a class="brand" href="/"><svg class="ico" viewBox="0 0 24 24" width="20" height="20"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>PPC Coding Tools</span></a>
+  <div class="nav-links">
+    <a href="/"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>หน้าหลัก</a>
+    <a href="/tools/drg" class="active"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>DRG Grouper</a>
+    <a href="/tools/deny"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Deny Code</a>
   </div>
+  <div class="nav-right">
+    <span class="nav-user"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="user-name">…</span></span>
+    <button class="nav-logout" onclick="doLogout()"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>ออกจากระบบ</button>
+  </div>
+</nav>
+<div class="page-head">
+  <h1>เช็ก DRG และค่า RW ก่อนส่งเบิก <span>by Dr.OraPat</span></h1>
+  <p>ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทาน ผลจริงยึดตาม Thai DRG Grouper ของ สปสช.</p>
 </div>
 
 <div class="main">
   <!-- ─── INPUT PANEL ─── -->
   <div class="input-panel">
     <div class="card">
-      <div class="card-header">📋 ข้อมูลผู้ป่วย</div>
+      <div class="card-header"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> ข้อมูลผู้ป่วย</div>
       <div class="card-body">
 
+<div class="form-grid">
+        <div class="fcol">
         <!-- ── HOSXP FETCH ── -->
-        <div class="section-label" style="margin-top:0">📥 มีเลข AN? ให้ระบบกรอกให้อัตโนมัติ</div>
+        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> มีเลข AN? ให้ระบบกรอกให้อัตโนมัติ</div>
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:6px">
           <div class="field-group" style="flex:1;margin-bottom:0">
             <label>AN (เลขที่ Admit)</label>
@@ -226,7 +266,7 @@
         <div id="hosxp-status" style="font-size:12px;color:#64748b;margin-bottom:10px"></div>
 
         <!-- ── DIAGNOSIS SEARCH ── -->
-        <div class="section-label" style="margin-top:0">🔍 หรือค้นหาจากชื่อโรคก็ได้</div>
+        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> หรือค้นหาจากชื่อโรคก็ได้</div>
         <div class="field-group" style="position:relative">
           <label>พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษก็ได้</label>
           <input id="diag-search" placeholder="เช่น ปอดอักเสบ, heart failure, เบาหวาน, sepsis…"
@@ -235,11 +275,15 @@
           <div style="font-size:11px;color:#94a3b8;margin-top:3px">คลิกเลือกเพื่อใส่ใน PDx</div>
         </div>
 
-        <div class="section-label">รหัสโรค ICD-10</div>
+        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg> รหัสโรค ICD-10</div>
         <div class="field-group">
           <label>PDx (โรคหลัก) <span style="color:#dc2626">*</span></label>
           <input id="pdx" placeholder="เช่น A41.9, I21.0, J18.9" autocomplete="off">
         </div>
+        
+        </div>
+        <div class="fcol">
+        <div class="section-label" style="margin-top:0">การวินิจฉัยรอง (SDx)</div>
         <div class="row2">
           <div class="field-group" style="position:relative">
             <label>SDx 1</label>
@@ -304,9 +348,12 @@
             <div id="sdx12-list" class="diag-dropdown" style="display:none"></div>
           </div>
         </div>
-        <button type="button" id="sdx-more-btn" class="btn-clear" style="margin-top:2px" onclick="showSdxExtra()">➕ เพิ่มช่อง SDx (สูงสุด 12)</button>
+        <button type="button" id="sdx-more-btn" class="btn-clear" style="margin-top:2px" onclick="showSdxExtra()"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="M12 5v14"/></svg> เพิ่มช่อง SDx (สูงสุด 12)</button>
 
-        <div class="section-label">🔪 OR Procedure (ICD-9-CM)</div>
+
+        </div>
+        <div class="fcol">
+        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg> OR Procedure (ICD-9-CM)</div>
         <div class="field-group"><label>Operation 1</label><input id="op1" placeholder="เช่น 38.48, 00.66, 81.54"></div>
         <div class="row2">
           <div class="field-group"><label>Operation 2</label><input id="op2" placeholder="Op2"></div>
@@ -330,16 +377,19 @@
             <div class="field-group"></div>
           </div>
         </div>
-        <button type="button" id="op-more-btn" class="btn-clear" style="margin-top:2px" onclick="showOpExtra()">➕ เพิ่มช่อง Operation (สูงสุด 10)</button>
+        <button type="button" id="op-more-btn" class="btn-clear" style="margin-top:2px" onclick="showOpExtra()"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="M12 5v14"/></svg> เพิ่มช่อง Operation (สูงสุด 10)</button>
 
-        <div class="section-label">💊 Non-OR Procedure (ICD-9-CM)</div>
+        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7"/><path d="m8.5 8.5 7 7"/></svg> Non-OR Procedure (ICD-9-CM)</div>
         <div class="field-group"><label>Non-OR 1</label><input id="nop1" placeholder="เช่น 96.04, 89.52, 54.91, 41.31"></div>
         <div class="row2">
           <div class="field-group"><label>Non-OR 2</label><input id="nop2" placeholder="NOP2"></div>
           <div class="field-group"><label>Non-OR 3</label><input id="nop3" placeholder="NOP3"></div>
         </div>
 
-        <div class="section-label">ข้อมูลทั่วไป</div>
+
+        </div>
+        <div class="fcol">
+        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> ข้อมูลทั่วไป</div>
         <div class="row3">
           <div class="field-group"><label>อายุ (ปี)</label><input id="age" type="number" min="0" max="150" placeholder="—"></div>
           <div class="field-group"><label>LOS (วัน)</label><input id="los" type="number" min="0" placeholder="—"></div>
@@ -375,14 +425,17 @@
           </div>
         </div>
 
-        <div class="section-label">ประมาณการรายได้</div>
+        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> ประมาณการรายได้</div>
         <div class="field-group">
           <label>อัตราต่อ RW (บาท) <span style="font-weight:400;color:#94a3b8;font-size:11px">— สปสช. ≈ 8,800 บ./RW</span></label>
           <input id="rw_rate" type="number" min="0" placeholder="เช่น 8800" value="8800" style="font-size:16px">
         </div>
 
-        <button class="btn-calc" onclick="calculate()">▶ คำนวณ DRG</button>
-        <button class="btn-clear" onclick="clearAll()">🗑 ล้างข้อมูล</button>
+        <button class="btn-calc" onclick="calculate()"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><polygon points="6 3 20 12 6 21 6 3"/></svg> คำนวณ DRG</button>
+        <button class="btn-clear" onclick="clearAll()"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> ล้างข้อมูล</button>
+        </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -390,11 +443,11 @@
   <!-- ─── RESULT PANEL ─── -->
   <div class="result-panel">
     <div class="card" style="margin-bottom:14px">
-      <div class="card-header" style="background:#f8fafc">📊 ผล DRG (ประมาณการ)</div>
+      <div class="card-header" style="background:#f8fafc"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> ผล DRG (ประมาณการ)</div>
       <div class="card-body">
         <div id="result-area">
           <div class="placeholder">
-            <div class="big">🏥</div>
+            <div class="big"><svg class="ico" viewBox="0 0 24 24" width="34" height="34" style="color:#5eead4"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
             กรอกข้อมูลและกด <strong>คำนวณ DRG</strong><br>
             เพื่อดู MDC · DRG · RW · CC/MCC
           </div>
@@ -404,8 +457,8 @@
 
     <div class="card">
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('alerts')">🔔 แจ้งเตือนแพทย์</button>
-        <button class="tab-btn" onclick="switchTab('ref')">📖 ตารางอ้างอิง</button>
+        <button class="tab-btn active" onclick="switchTab('alerts')"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> แจ้งเตือนแพทย์</button>
+        <button class="tab-btn" onclick="switchTab('ref')"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> ตารางอ้างอิง</button>
       </div>
 
       <div id="tab-alerts" class="tab-content active">
@@ -10103,7 +10156,7 @@ function calculate(){
   let triggered = getAlerts(pdx, sdxList, ops, los, dchtype, typehosp);
   let ahtml = "";
   if(!triggered.length){
-    ahtml = `<div class="alert-ok">✅ ไม่พบความเสี่ยง DENY CODE จากรหัสที่ให้<br><small>ยังควรตรวจสอบความถูกต้องของรหัสก่อนส่งเบิก</small></div>`;
+    ahtml = `<div class="alert-ok"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg> ไม่พบความเสี่ยง DENY CODE จากรหัสที่ให้<br><small>ยังควรตรวจสอบความถูกต้องของรหัสก่อนส่งเบิก</small></div>`;
   } else {
     ahtml += `<div style="font-size:14px;color:#64748b;margin-bottom:10px">⚠️ พบ <strong style="color:#dc2626">${triggered.length} รายการ</strong> ที่ควรทบทวนก่อนส่งเบิก</div>`;
     for(let a of triggered){
@@ -10125,7 +10178,7 @@ function clearAll(){
   });
   document.getElementById("dchtype").value="";
   document.getElementById("typehosp").value="";
-  document.getElementById("result-area").innerHTML = `<div class="placeholder"><div class="big">🏥</div>กรอกข้อมูลและกด <strong>คำนวณ DRG</strong><br>เพื่อดู MDC · DRG · RW · CC/MCC</div>`;
+  document.getElementById("result-area").innerHTML = `<div class="placeholder"><div class="big"><svg class="ico" viewBox="0 0 24 24" width="34" height="34" style="color:#5eead4"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>กรอกข้อมูลและกด <strong>คำนวณ DRG</strong><br>เพื่อดู MDC · DRG · RW · CC/MCC</div>`;
   document.getElementById("alerts-area").innerHTML = `<div class="alert-empty">กดคำนวณ DRG เพื่อดูการแจ้งเตือน</div>`;
 }
 
@@ -10173,7 +10226,7 @@ async function loadCurrentUser(){
     const r = await fetch("/api/me");
     const d = await r.json();
     if(!d.user || d.user.role==="GUEST"){ location.href="/login"; return; }
-    document.getElementById("user-name").textContent = `👤 ${d.user.name} (${d.user.role})`;
+    document.getElementById("user-name").textContent = `${d.user.name} (${d.user.role})`;
   } catch { /* offline — ปล่อยให้ใช้งานแบบกรอกมือได้ */ }
 }
 
@@ -10214,8 +10267,8 @@ async function fetchFromHosxp(){
       document.getElementById("dchtype").value = d.dchstts;
     }
     const parts = [
-      `✅ AN ${d.an}`, d.ptname ? `ผู้ป่วย: ${d.ptname}` : null,
-      d.pdx ? `PDx ${d.pdx}` : "⚠️ ยังไม่มี PDx ในฐาน",
+      `AN ${d.an}`, d.ptname ? `ผู้ป่วย: ${d.ptname}` : null,
+      d.pdx ? `PDx ${d.pdx}` : "(ยังไม่มี PDx ในฐาน)",
       `SDx ${ (d.sdx||[]).length } รายการ`, `หัตถการ ${ (d.ops||[]).length } รายการ`,
       d.adjrw!=null ? `AdjRW จริงในฐาน = ${Number(d.adjrw).toFixed(4)}` : null,
     ].filter(Boolean);

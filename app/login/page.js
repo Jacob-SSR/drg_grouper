@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 
+const Icon = ({ d, size = 20 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />
+);
+const IC = { activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' };
+
+
 const mint = {
   bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
   ink: "#134e4a",
@@ -100,7 +107,7 @@ export default function LoginPage() {
   return (
     <div style={styles.wrap}>
       <form style={styles.card} onSubmit={submit}>
-        <div style={{ textAlign: "center", fontSize: 46, marginBottom: 6 }}>🌿</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><div style={{ width: 60, height: 60, borderRadius: 18, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.activity} size={30} /></div></div>
         <h1
           style={{
             textAlign: "center",
@@ -110,7 +117,7 @@ export default function LoginPage() {
             fontWeight: 600,
           }}
         >
-          ยินดีต้อนรับกลับมา 👋
+          ยินดีต้อนรับกลับมา
         </h1>
         <div style={{ textAlign: "center", fontSize: 13.5, color: mint.sub, marginBottom: 26 }}>
           เข้าสู่ระบบก่อน แล้วไปเช็ก DRG กับ Deny Code กันเลย

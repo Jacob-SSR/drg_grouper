@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+const Icon = ({ d, size = 20 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />
+);
+const IC = {
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  calc: '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+};
+
+
 // ── ธีมมิ้นต์พาสเทล ──
 const mint = {
   bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
@@ -63,9 +74,9 @@ export default function Home() {
 
   return (
     <div style={wrap}>
-      <div style={{ fontSize: 52, marginBottom: 4 }}>🌿</div>
+      <div style={{ width: 68, height: 68, borderRadius: 20, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}><Icon d={IC.activity} size={34} /></div>
       <h1 style={{ fontSize: 28, margin: "0 0 6px", fontWeight: 600 }}>
-        สวัสดี{user ? ` คุณ${user.name}` : ""} 👋
+        สวัสดี{user ? ` คุณ${user.name}` : ""}
       </h1>
       <p style={{ color: mint.sub, margin: "0 0 30px", fontSize: 15, textAlign: "center" }}>
         วันนี้อยากตรวจอะไรก่อนส่งเบิกดี?
@@ -78,7 +89,7 @@ export default function Home() {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
         >
-          <div style={{ fontSize: 38 }}>🧮</div>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.calc} size={26} /></div>
           <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
             เช็ก DRG และค่า RW
           </h2>
@@ -97,7 +108,7 @@ export default function Home() {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
         >
-          <div style={{ fontSize: 38 }}>🔍</div>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.shield} size={26} /></div>
           <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
             ตรวจรหัสเสี่ยงโดนปฏิเสธ
           </h2>
