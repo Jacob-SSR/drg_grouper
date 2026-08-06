@@ -1,20 +1,21 @@
 {
-  "name": "drg-grouper",
+  "name": "ppc-coding-tools",
   "version": "1.0.0",
   "private": true,
-  "description": "DRG Grouper จำลอง + แจ้งเตือน DENY CODE — ดึงข้อมูลจริงจาก HOSxP พร้อมระบบ login",
-  "main": "server.js",
+  "description": "เครื่องมือ Coding/เคลม: DRG Grouper + Deny Code Checker — ข้อมูลจริงจาก HOSxP + ระบบ login แบบ ppc-hos-10667",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
+    "jose": "^6.1.3",
     "jsonwebtoken": "^9.0.2",
     "md5": "^2.3.0",
-    "mysql2": "^3.11.5"
+    "mysql2": "^3.11.5",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   }
 }

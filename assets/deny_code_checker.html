@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denile code checker program BY Dr.OraPat</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh}
+header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:14px}
+header h1{font-size:1.4rem;font-weight:700}header h1 span{color:#e94560;font-size:1rem;margin-left:8px}
+.badge{background:#e94560;color:#fff;border-radius:20px;padding:3px 12px;font-size:.75rem;font-weight:700;margin-left:10px}
+.container{max-width:1300px;margin:0 auto;padding:20px}
+.upload-zone{background:#fff;border:2.5px dashed #3182ce;border-radius:14px;padding:36px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:18px}
+.upload-zone:hover{border-color:#e94560;background:#fff5f5}
+.upload-zone h2{font-size:1.1rem;color:#2d3748;margin-bottom:8px}
+.upload-zone p{font-size:.85rem;color:#718096}
+#fileInput{display:none}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:#e94560;color:#fff}.btn-primary:hover{background:#c0392b}
+.btn-blue{background:#3182ce;color:#fff}.btn-blue:hover{background:#2c5282}
+.btn-green{background:#38a169;color:#fff}.btn-green:hover{background:#276749}
+.btn-gray{background:#e2e8f0;color:#4a5568}.btn-gray:hover{background:#cbd5e0}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#fff;border-radius:10px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 4px #0001}
+.bar input,.bar select{padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.85rem;outline:none}
+.bar input:focus,.bar select:focus{border-color:#3182ce}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stat{flex:1;min-width:120px;background:#fff;border-radius:10px;padding:14px 18px;text-align:center;box-shadow:0 1px 4px #0001}
+.stat .num{font-size:1.8rem;font-weight:800}.stat .lbl{font-size:.75rem;color:#718096;margin-top:2px}
+.s-total .num{color:#2d3748}.s-high .num{color:#e53e3e}.s-med .num{color:#dd6b20}.s-clean .num{color:#38a169}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px #0001;font-size:.82rem}
+th{background:#1a1a2e;color:#fff;padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0f4f8;vertical-align:top}
+tr:hover td{background:#ebf8ff}
+.risk-high{background:#fff5f5;border-left:4px solid #e53e3e}
+.risk-med{background:#fffaf0;border-left:4px solid #dd6b20}
+.risk-clean{background:#f0fff4;border-left:4px solid #38a169}
+.tag{display:inline-block;border-radius:4px;padding:2px 7px;font-size:.72rem;font-weight:700;margin:1px}
+.tag-cr{background:#fed7d7;color:#c53030}
+.tag-ea{background:#fef3c7;color:#92400e}
+.tag-ok{background:#c6f6d5;color:#276749}
+.tag-code{background:#e9d8fd;color:#553c9a}
+.col-map{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px #0001}
+.col-map h3{font-size:.9rem;font-weight:700;color:#2d3748;margin-bottom:10px}
+.col-map .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.col-map select{width:100%;padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:.8rem}
+.col-map label{font-size:.78rem;color:#718096;display:block;margin-bottom:3px}
+.hidden{display:none}
+.empty{text-align:center;padding:60px 20px;color:#a0aec0}
+.empty h3{font-size:1.1rem;margin-bottom:8px}
+#mappingSection,#resultSection{display:none}
+.detail-list{font-size:.78rem;color:#4a5568;margin-top:4px}
+.detail-list li{margin-bottom:2px;list-style:none;padding-left:10px;position:relative}
+.detail-list li::before{content:"→";position:absolute;left:0;color:#a0aec0}
+</style>
+</head>
+<body>
+<header>
+  <div>🔍</div>
+  <h1>Denile code checker program <span>By Dr.OraPat</span></h1>
+  <span class="badge">สปสช. AI Pre-Audit v2567</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.8rem">
+    <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:.75rem;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
+    <a href="/tools/drg" style="color:#fff;opacity:.85;text-decoration:none;font-size:.75rem;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🧮 DRG Grouper</a>
+    <span id="user-name" style="opacity:.9">👤 …</span>
+    <button onclick="doLogout()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.75rem">ออกจากระบบ</button>
+  </div>
+</header>
+<div class="container">
+
+<!-- HOSxP direct fetch -->
+<div class="bar" style="border:2px solid #0f766e;background:#f0fdfa">
+  <strong style="font-size:.9rem;color:#0f766e">📥 ดึงข้อมูลจริงจาก HOSxP</strong>
+  <label style="font-size:.8rem;color:#4a5568">วันที่จำหน่าย:</label>
+  <input type="date" id="hosxp-start">
+  <span style="color:#718096">ถึง</span>
+  <input type="date" id="hosxp-end">
+  <button class="btn btn-green" id="hosxp-btn" onclick="fetchHosxpCases()">▶ ดึงและตรวจสอบทันที</button>
+  <span id="hosxp-status" style="font-size:.8rem;color:#718096"></span>
+</div>
+
+<!-- Upload -->
+<div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+  <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
+  <h2>📂 อัปโหลดไฟล์ Excel / CSV จาก HosXP</h2>
+  <p>คลิกหรือลากไฟล์มาวาง · รองรับ .xlsx .xls .csv</p>
+  <p style="margin-top:8px;color:#e94560;font-size:.8rem">deny_code_sample.xlsx หรือ Export จาก HosXP ได้เลย</p>
+</div>
+
+<!-- Column mapping -->
+<div id="mappingSection" class="col-map">
+  <h3>🗺️ Column Mapping — ตรวจสอบและแก้ไขได้</h3>
+  <div class="grid" id="mappingGrid"></div>
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="runCheck()">▶ เริ่มตรวจสอบ</button>
+    <button class="btn btn-gray" onclick="location.reload()">↺ โหลดใหม่</button>
+  </div>
+</div>
+
+<!-- Results -->
+<div id="resultSection">
+  <div class="stats">
+    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">ทั้งหมด</div></div>
+    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 ความเสี่ยงสูง</div></div>
+    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ความเสี่ยงกลาง</div></div>
+    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ผ่านการตรวจ</div></div>
+  </div>
+  <div class="bar">
+    <input type="text" id="srch" placeholder="🔍 ค้นหา HN / AN / รหัส..." oninput="renderTable()" style="width:220px">
+    <select id="fltRisk" onchange="renderTable()">
+      <option value="">ความเสี่ยงทั้งหมด</option>
+      <option value="high">🔴 ความเสี่ยงสูง</option>
+      <option value="medium">🟡 ความเสี่ยงกลาง</option>
+      <option value="clean">✅ ผ่าน</option>
+    </select>
+    <select id="fltCode" onchange="renderTable()">
+      <option value="">เงื่อนไขทั้งหมด</option>
+      <option value="CR1">CR1 Sepsis</option>
+      <option value="CR5">CR5 Acidosis</option>
+      <option value="CR8">CR8 Volume OL</option>
+      <option value="CR13">CR13 COPD+LOS≤1</option>
+      <option value="CR19">CR19 Necrotizing F.</option>
+      <option value="CR37">CR37 Shock</option>
+      <option value="CR39">CR39 Aplastic</option>
+      <option value="CR44">CR44 สารเสพติด</option>
+      <option value="CR45">CR45 Atherosclerosis</option>
+      <option value="CR58">CR58 PCI รพ.เล็ก</option>
+      <option value="EA02">EA02 Hypersplenism</option>
+      <option value="EA03">EA03 E16.2+Sepsis</option>
+      <option value="EA05">EA05 Alcohol W.</option>
+      <option value="EA08">EA08 GI bleed+ulcer</option>
+      <option value="EA09">EA09 Hemorrhoid</option>
+      <option value="EA12">EA12 UTI+Kidney</option>
+      <option value="EA15">EA15 Ascites</option>
+    </select>
+    <button class="btn btn-green" onclick="exportExcel()">📥 Export Excel</button>
+    <button class="btn btn-gray" onclick="location.reload()">↺ โหลดใหม่</button>
+  </div>
+  <div style="overflow-x:auto">
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>#</th><th>HN</th><th>AN</th><th>PDx</th><th>SDx</th><th>หัตถการ</th>
+          <th>LOS</th><th>Dchtype</th><th>Typehosp</th><th>RW</th>
+          <th>ความเสี่ยง</th><th>เงื่อนไขที่พบ</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<script>
+let rawData = [], headers = [], checkedResults = [];
+const FIELDS = {hn:'',an:'',pdx:'',sdx:[], ops:[], los:'',dchtype:'',typehosp:'',rw:''};
+let colMap = {};
+
+// Normalize: remove dots, uppercase, trim
+function norm(c){ return String(c||'').replace(/\./g,'').toUpperCase().trim(); }
+// Check prefix match
+function ck(arr,pre){ return arr.some(c=>norm(c).startsWith(norm(pre))); }
+// Check exact (after norm)
+function ckExact(arr,code){ return arr.some(c=>norm(c)===norm(code)); }
+
+function handleFile(e){
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb = XLSX.read(ev.target.result,{type:'binary'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws,{defval:''});
+      rawData = data;
+      if(data.length===0){alert('ไม่พบข้อมูลในไฟล์');return;}
+      headers = Object.keys(data[0]);
+      autoDetect();
+    } catch(err){ alert('อ่านไฟล์ไม่ได้: '+err.message); }
+  };
+  reader.readAsBinaryString(f);
+}
+
+function autoDetect(){
+  const h = headers.map(x=>x.toLowerCase().trim());
+  const find = (aliases) => { for(let a of aliases){ const i=h.findIndex(x=>x.includes(a)); if(i>=0) return headers[i]; } return ''; };
+  const findArr = (aliases) => { return headers.filter((_,i)=>aliases.some(a=>h[i].includes(a))); };
+
+  colMap.hn = find(['hn']);
+  colMap.an = find(['an']);
+  colMap.pdx = find(['pdx','pdx','primary','maindiag','diag1','icd10']);
+  colMap.sdx = findArr(['sdx','sdx1','sdx2','sdx3','sdx4','sdx5','sec','co-morbid','comorbid']).filter(x=>x!==colMap.pdx);
+  colMap.ops = findArr(['oper','op','proced','icd9','operation','op1','op2']);
+  colMap.los = find(['los','length','วันนอน','day']);
+  colMap.dchtype = find(['dchtype','dch','discharge','จำหน่าย','ประเภทจำหน่าย']);
+  colMap.typehosp = find(['typehosp','type_hosp','typehsop','ระดับ','level','hosp']);
+  colMap.rw = find(['rw','relative','weight']);
+
+  buildMappingUI();
+  document.getElementById('mappingSection').style.display='block';
+}
+
+function buildMappingUI(){
+  const grid = document.getElementById('mappingGrid');
+  const defs = [
+    {key:'hn',label:'HN',single:true},
+    {key:'an',label:'AN',single:true},
+    {key:'pdx',label:'PDx (โรคหลัก) ★',single:true},
+    {key:'sdx',label:'SDx (โรคร่วม) — เลือกได้หลายcol',single:false},
+    {key:'ops',label:'หัตถการ (ICD-9) — เลือกได้หลายcol',single:false},
+    {key:'los',label:'LOS (วันนอน)',single:true},
+    {key:'dchtype',label:'Dchtype',single:true},
+    {key:'typehosp',label:'Typehosp (ระดับ รพ.)',single:true},
+    {key:'rw',label:'RW',single:true},
+  ];
+  grid.innerHTML = '';
+  defs.forEach(d=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<label>${d.label}</label>`;
+    if(d.single){
+      const sel=document.createElement('select');
+      sel.id='map_'+d.key;
+      sel.innerHTML='<option value="">-- ไม่ใช้ --</option>'+headers.map(h=>`<option value="${h}" ${colMap[d.key]===h?'selected':''}>${h}</option>`).join('');
+      div.appendChild(sel);
+    } else {
+      const wrap=document.createElement('div');
+      wrap.style.cssText='display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:4px';
+      headers.forEach(h=>{
+        const checked = (colMap[d.key]||[]).includes(h);
+        const label=document.createElement('label');
+        label.style.cssText='display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer';
+        label.innerHTML=`<input type="checkbox" name="map_${d.key}" value="${h}" ${checked?'checked':''}> ${h}`;
+        wrap.appendChild(label);
+      });
+      div.appendChild(wrap);
+    }
+    grid.appendChild(div);
+  });
+}
+
+function getMapVal(key, single=true){
+  if(single){
+    const el=document.getElementById('map_'+key);
+    return el?el.value:'';
+  } else {
+    return [...document.querySelectorAll(`input[name="map_${key}"]:checked`)].map(x=>x.value);
+  }
+}
+
+function getCells(row, cols){
+  if(!cols||!cols.length) return [];
+  return cols.map(c=>String(row[c]||'').trim()).filter(Boolean);
+}
+
+// ===== DENY CODE RULES =====
+function checkRow(row){
+  const pdx  = String(row[getMapVal('pdx')]||'').trim();
+  const sdxCols = getMapVal('sdx',false);
+  const opCols  = getMapVal('ops',false);
+  const sdxArr  = getCells(row,sdxCols);
+  const opArr   = getCells(row,opCols);
+  const allDx   = [pdx,...sdxArr].filter(Boolean);
+  const los     = parseFloat(row[getMapVal('los')])||0;
+  const dchtype = String(row[getMapVal('dchtype')]||'').trim();
+  const typehosp= String(row[getMapVal('typehosp')]||'').trim().toUpperCase();
+
+  const flags=[];
+
+  // CR1: Sepsis A41.x — ต้องมีอวัยวะล้มเหลว R65.1 หรือ N17/N19 หรือ J96/J18
+  if(ck(allDx,'A41')){
+    const hasOrgan = ck(allDx,'R65')||ck(allDx,'N17')||ck(allDx,'N19')||ck(allDx,'J96')||ck(allDx,'J18')||ck(allDx,'K72')||ck(allDx,'G93');
+    if(!hasOrgan) flags.push({code:'CR1',sev:'high',msg:'Sepsis (A41.x) ไม่มีรหัสอวัยวะล้มเหลว'});
+  }
+
+  // CR5: Acidosis E87.2 — ควรมี DM, CKD, Sepsis หรือ Resp failure
+  if(ck(allDx,'E872')||ck(allDx,'E87.2')){
+    const hasCause=ck(allDx,'E1')||ck(allDx,'N18')||ck(allDx,'N17')||ck(allDx,'A41')||ck(allDx,'J96');
+    if(!hasCause) flags.push({code:'CR5',sev:'medium',msg:'Acidosis (E87.2) ไม่มีรหัสสาเหตุ'});
+  }
+
+  // CR8: Volume overload E87.7 — ควรมี HF/CKD/NS
+  if(ck(allDx,'E877')||ck(allDx,'E87.7')){
+    const hasCause=ck(allDx,'I50')||ck(allDx,'N18')||ck(allDx,'N04');
+    if(!hasCause) flags.push({code:'CR8',sev:'medium',msg:'Volume overload (E87.7) ไม่มีสาเหตุ'});
+  }
+
+  // CR13: COPD+LOS≤1 วัน
+  if((ck(allDx,'J44')||ck(allDx,'J43'))&&los<=1){
+    flags.push({code:'CR13',sev:'medium',msg:'COPD J44/J43 LOS ≤ 1 วัน'});
+  }
+
+  // CR19: Necrotizing fasciitis M72.6 — ควรมีผ่าตัด
+  if(ck(allDx,'M726')||ck(allDx,'M72.6')){
+    const hasSurg=ck(opArr,'86')||ck(opArr,'54');
+    if(!hasSurg) flags.push({code:'CR19',sev:'high',msg:'NF (M72.6) ไม่มีรหัสผ่าตัด'});
+  }
+
+  // CR37: Shock R57.x — ควรมีสาเหตุ
+  if(ck(allDx,'R57')){
+    const hasCause=ck(allDx,'A41')||ck(allDx,'I21')||ck(allDx,'T')||ck(allDx,'J18');
+    if(!hasCause) flags.push({code:'CR37',sev:'high',msg:'Shock (R57.x) ไม่มีรหัสสาเหตุ'});
+  }
+
+  // CR39: Aplastic anemia D61 — ควรมีหัตถการ (BM biopsy/transfusion)
+  if(ck(allDx,'D61')){
+    const hasProc=ck(opArr,'41.3')||ck(opArr,'99.0');
+    if(!hasProc) flags.push({code:'CR39',sev:'medium',msg:'Aplastic anemia (D61) ไม่มีหัตถการ'});
+  }
+
+  // CR44: สารเสพติด F10-F19 ใน typehosp S/M/F/A (ไม่ใช่ addiction unit)
+  if(ck(allDx,'F1')&&!['P','T1','T2'].includes(typehosp)){
+    flags.push({code:'CR44',sev:'medium',msg:`สารเสพติด (F1x) ใน typehosp ${typehosp}`});
+  }
+
+  // CR45: Atherosclerosis I25.1 ไม่ระบุตำแหน่ง — ควรระบุให้ชัด
+  if(ckExact(allDx,'I251')||ckExact(allDx,'I25.1')){
+    flags.push({code:'CR45',sev:'medium',msg:'Atherosclerosis I25.1 ไม่ระบุตำแหน่ง'});
+  }
+
+  // CR58: PCI (36.06/36.07) ใน รพ.ระดับ M/F
+  if((ck(opArr,'3606')||ck(opArr,'3607')||ck(opArr,'36.06')||ck(opArr,'36.07'))&&['M','F','F1','F2'].includes(typehosp)){
+    flags.push({code:'CR58',sev:'high',msg:`PCI ใน รพ.ระดับ ${typehosp}`});
+  }
+
+  // EA02: Hypersplenism D73.1 ต้องมีหัตถการ
+  if(ckExact(allDx,'D731')||ckExact(allDx,'D73.1')){
+    const hasProc=opArr.length>0;
+    if(!hasProc) flags.push({code:'EA02',sev:'medium',msg:'Hypersplenism (D73.1) ไม่มีหัตถการ'});
+  }
+
+  // EA03: E16.2 Hypoglycemia ร่วมกับ Sepsis
+  if((ck(allDx,'E162')||ck(allDx,'E16.2'))&&ck(allDx,'A41')){
+    flags.push({code:'EA03',sev:'medium',msg:'E16.2+Sepsis — ตรวจสอบ sequencing'});
+  }
+
+  // EA05: Alcohol withdrawal F10.3/F10.4
+  if(ck(allDx,'F103')||ck(allDx,'F10.3')||ck(allDx,'F104')||ck(allDx,'F10.4')){
+    flags.push({code:'EA05',sev:'medium',msg:'Alcohol withdrawal F10.3/4 — ตรวจสอบ'});
+  }
+
+  // EA08: GI bleeding K92.0/K92.1/K92.2 + ulcer — ต้องมี Endoscopy
+  if(ck(allDx,'K920')||ck(allDx,'K921')||ck(allDx,'K922')||ck(allDx,'K92.')){
+    const hasScope=ck(opArr,'45.1')||ck(opArr,'44.1')||ck(opArr,'451')||ck(opArr,'441');
+    if(!hasScope) flags.push({code:'EA08',sev:'medium',msg:'GI bleeding ไม่มี Endoscopy'});
+  }
+
+  // EA09: Hemorrhoid K64 + bleeding — ต้องมีหัตถการ
+  if(ck(allDx,'K64')&&(ck(allDx,'K921')||ck(allDx,'K922'))){
+    const hasProc=ck(opArr,'49')||opArr.length>0;
+    if(!hasProc) flags.push({code:'EA09',sev:'medium',msg:'Hemorrhoid bleed ไม่มีหัตถการ'});
+  }
+
+  // EA12: UTI N39.0 + Kidney stone N20
+  if((ck(allDx,'N390')||ck(allDx,'N39.0'))&&(ck(allDx,'N20')||ck(allDx,'N21'))){
+    flags.push({code:'EA12',sev:'medium',msg:'UTI + Kidney stone — ตรวจสอบ PDx'});
+  }
+
+  // EA15: Ascites R18 ไม่มีหัตถการ (54.91 = paracentesis)
+  if(ck(allDx,'R18')&&!ck(opArr,'5491')&&!ck(opArr,'54.91')){
+    flags.push({code:'EA15',sev:'medium',msg:'Ascites (R18) ไม่มี Paracentesis'});
+  }
+
+  let sev = 'clean';
+  if(flags.some(f=>f.sev==='high')) sev='high';
+  else if(flags.length>0) sev='medium';
+
+  return {flags,sev};
+}
+
+function runCheck(){
+  const pdxCol=getMapVal('pdx');
+  if(!pdxCol){alert('กรุณาระบุ column PDx');return;}
+
+  checkedResults = rawData.map((row,i)=>{
+    const r = checkRow(row);
+    return {...r, row, idx:i+1,
+      hn: String(row[getMapVal('hn')]||''),
+      an: String(row[getMapVal('an')]||''),
+      pdx: String(row[getMapVal('pdx')]||''),
+      sdx: getCells(row,getMapVal('sdx',false)),
+      ops: getCells(row,getMapVal('ops',false)),
+      los: String(row[getMapVal('los')]||''),
+      dchtype: String(row[getMapVal('dchtype')]||''),
+      typehosp: String(row[getMapVal('typehosp')]||''),
+      rw: String(row[getMapVal('rw')]||''),
+    };
+  });
+
+  document.getElementById('cntTotal').textContent = checkedResults.length;
+  document.getElementById('cntHigh').textContent  = checkedResults.filter(r=>r.sev==='high').length;
+  document.getElementById('cntMed').textContent   = checkedResults.filter(r=>r.sev==='medium').length;
+  document.getElementById('cntClean').textContent = checkedResults.filter(r=>r.sev==='clean').length;
+
+  document.getElementById('resultSection').style.display='block';
+  document.getElementById('mappingSection').style.display='none';
+  renderTable();
+}
+
+function renderTable(){
+  const srch = document.getElementById('srch').value.toLowerCase();
+  const fRisk= document.getElementById('fltRisk').value;
+  const fCode= document.getElementById('fltCode').value;
+
+  let rows = checkedResults.filter(r=>{
+    if(fRisk && r.sev!==fRisk) return false;
+    if(fCode && !r.flags.some(f=>f.code.startsWith(fCode))) return false;
+    if(srch){
+      const hay=[r.hn,r.an,r.pdx,...r.sdx,...r.ops].join(' ').toLowerCase();
+      if(!hay.includes(srch)) return false;
+    }
+    return true;
+  });
+
+  const tbody=document.getElementById('resultBody');
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="12" class="empty"><h3>ไม่พบข้อมูล</h3><p>ลองเปลี่ยนตัวกรอง</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r,i)=>{
+    const cls = r.sev==='high'?'risk-high':r.sev==='medium'?'risk-med':'risk-clean';
+    const sev = r.sev==='high'?'<span style="color:#e53e3e;font-weight:700">🔴 สูง</span>':r.sev==='medium'?'<span style="color:#dd6b20;font-weight:700">🟡 กลาง</span>':'<span style="color:#38a169">✅ ผ่าน</span>';
+    const tags = r.flags.length?r.flags.map(f=>`<span class="tag ${f.code.startsWith('CR')?'tag-cr':'tag-ea'}">${f.code}</span>`).join(''):'<span class="tag tag-ok">Clean</span>';
+    const details = r.flags.length?`<ul class="detail-list">${r.flags.map(f=>`<li>${f.msg}</li>`).join('')}</ul>`:'';
+    return `<tr class="${cls}">
+      <td>${r.idx}</td>
+      <td><code style="font-size:.8rem">${r.hn}</code></td>
+      <td><code style="font-size:.8rem">${r.an}</code></td>
+      <td><span class="tag tag-code">${r.pdx}</span></td>
+      <td style="max-width:120px">${r.sdx.map(s=>`<span class="tag tag-code">${s}</span>`).join('')}</td>
+      <td style="max-width:120px">${r.ops.map(s=>`<span class="tag" style="background:#bee3f8;color:#2a4365">${s}</span>`).join('')}</td>
+      <td>${r.los}</td>
+      <td>${r.dchtype}</td>
+      <td>${r.typehosp}</td>
+      <td>${r.rw}</td>
+      <td>${sev}</td>
+      <td>${tags}${details}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportExcel(){
+  if(!checkedResults.length){alert('ยังไม่มีผลการตรวจ');return;}
+  const data = checkedResults.map(r=>({
+    'HN': r.hn, 'AN': r.an, 'PDx': r.pdx,
+    'SDx': r.sdx.join(', '), 'หัตถการ': r.ops.join(', '),
+    'LOS': r.los, 'Dchtype': r.dchtype, 'Typehosp': r.typehosp, 'RW': r.rw,
+    'ความเสี่ยง': r.sev==='high'?'สูง':r.sev==='medium'?'กลาง':'ผ่าน',
+    'รหัส DENY': r.flags.map(f=>f.code).join(', '),
+    'รายละเอียด': r.flags.map(f=>f.msg).join(' | '),
+  }));
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Deny Check Result');
+  XLSX.writeFile(wb,'deny_check_result.xlsx');
+}
+
+// Drag & drop
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='#e94560'});
+dz.addEventListener('dragleave',()=>{dz.style.borderColor='#3182ce'});
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.style.borderColor='#3182ce';
+  const f=e.dataTransfer.files[0];
+  if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('fileInput').files=dt.files;handleFile({target:{files:dt.files}});}
+});
+
+// ═══ AUTH + HOSXP (เชื่อมระบบ auth แบบ ppc-hos-10667) ═══
+async function loadCurrentUser(){
+  try {
+    const r = await fetch('/api/me');
+    const d = await r.json();
+    if(!d.user || d.user.role==='GUEST'){ location.href='/login'; return; }
+    document.getElementById('user-name').textContent = `👤 ${d.user.name} (${d.user.role})`;
+  } catch { /* offline — ยังใช้โหมดอัปโหลดไฟล์ได้ */ }
+}
+loadCurrentUser();
+
+async function doLogout(){
+  try { await fetch('/api/logout',{method:'POST'}); } catch {}
+  location.href='/login';
+}
+
+// ค่าเริ่มต้นช่วงวันที่: 30 วันล่าสุด
+(function(){
+  const today = new Date(), past = new Date(Date.now() - 30*86400000);
+  const fmt = d => d.toISOString().slice(0,10);
+  document.getElementById('hosxp-end').value = fmt(today);
+  document.getElementById('hosxp-start').value = fmt(past);
+})();
+
+// ดึงเคสจำหน่ายจาก HOSxP → ป้อนเข้า pipeline เดิม (autoDetect + runCheck)
+async function fetchHosxpCases(){
+  const start = document.getElementById('hosxp-start').value;
+  const end   = document.getElementById('hosxp-end').value;
+  const st    = document.getElementById('hosxp-status');
+  const btn   = document.getElementById('hosxp-btn');
+  if(!start || !end){ st.textContent='กรุณาเลือกช่วงวันที่'; st.style.color='#e53e3e'; return; }
+  btn.disabled = true; st.style.color='#718096'; st.textContent='กำลังดึงข้อมูลจาก HOSxP…';
+  try {
+    const r = await fetch(`/api/hosxp/cases?start=${start}&end=${end}`);
+    if(r.status===401){ location.href='/login'; return; }
+    const d = await r.json();
+    if(!r.ok){ st.textContent = d.error || 'ดึงข้อมูลไม่สำเร็จ'; st.style.color='#e53e3e'; return; }
+    if(!d.cases.length){ st.textContent = `ไม่พบเคสจำหน่ายช่วง ${start} ถึง ${end}`; st.style.color='#dd6b20'; return; }
+
+    // ป้อนข้อมูลเข้า pipeline เดิมเสมือนอ่านจากไฟล์ Excel
+    rawData = d.cases;
+    headers = Object.keys(d.cases[0]);
+    autoDetect();               // จับ column mapping อัตโนมัติ (ชื่อคอลัมน์ตรงอยู่แล้ว)
+    runCheck();                 // ตรวจทันที (ย้อนแก้ mapping ได้จากปุ่มโหลดใหม่)
+    st.textContent = `✅ ดึงมา ${d.count} เคส (จำหน่าย ${start} ถึง ${end}) — ตรวจเสร็จแล้ว`;
+    st.style.color = '#0f766e';
+  } catch {
+    st.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'; st.style.color='#e53e3e';
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
