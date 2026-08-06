@@ -51,13 +51,13 @@ export async function GET(req) {
       [start, end],
     );
 
-    // แตก sdx / ops เป็นคอลัมน์แบน sdx1..sdx10, op1..op5
+    // แตก sdx / ops เป็นคอลัมน์แบน sdx1..sdx12, op1..op10
     const cases = rows.map((r) => {
       const sdxArr = (r.sdx ? String(r.sdx).split(",") : []).filter(Boolean);
       const opArr = (r.ops ? String(r.ops).split(",") : []).filter(Boolean);
       const row = { hn: r.hn, an: r.an, pdx: r.pdx || "" };
-      for (let i = 0; i < 10; i++) row["sdx" + (i + 1)] = sdxArr[i] || "";
-      for (let i = 0; i < 5; i++) row["op" + (i + 1)] = opArr[i] || "";
+      for (let i = 0; i < 12; i++) row["sdx" + (i + 1)] = sdxArr[i] || "";
+      for (let i = 0; i < 10; i++) row["op" + (i + 1)] = opArr[i] || "";
       row.los = r.los ?? "";
       // dchstts (สถานะจำหน่าย 1 หาย 2 ดีขึ้น 3 ไม่ดีขึ้น 4 ตาย 5 ส่งต่อ ...)
       // คือค่าที่กติกา DENY ใช้ — ส่งเป็นคอลัมน์ dchtype ของ pipeline เดิม

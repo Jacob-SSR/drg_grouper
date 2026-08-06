@@ -264,6 +264,19 @@
             <div id="sdx10-list" class="diag-dropdown" style="display:none"></div>
           </div>
         </div>
+        <div class="row2" id="sdx-extra" style="display:none">
+          <div class="field-group" style="position:relative">
+            <label>SDx 11</label>
+            <input id="sdx11" placeholder="SDx11" autocomplete="off" oninput="searchDiag(this.value,'sdx11-list')" onfocus="searchDiag(this.value,'sdx11-list')">
+            <div id="sdx11-list" class="diag-dropdown" style="display:none"></div>
+          </div>
+          <div class="field-group" style="position:relative">
+            <label>SDx 12</label>
+            <input id="sdx12" placeholder="SDx12" autocomplete="off" oninput="searchDiag(this.value,'sdx12-list')" onfocus="searchDiag(this.value,'sdx12-list')">
+            <div id="sdx12-list" class="diag-dropdown" style="display:none"></div>
+          </div>
+        </div>
+        <button type="button" id="sdx-more-btn" class="btn-clear" style="margin-top:2px" onclick="showSdxExtra()">➕ เพิ่มช่อง SDx (สูงสุด 12)</button>
 
         <div class="section-label">🔪 OR Procedure (ICD-9-CM)</div>
         <div class="field-group"><label>Operation 1</label><input id="op1" placeholder="เช่น 38.48, 00.66, 81.54"></div>
@@ -275,6 +288,21 @@
           <div class="field-group"><label>Operation 4</label><input id="op4" placeholder="Op4"></div>
           <div class="field-group"><label>Operation 5</label><input id="op5" placeholder="Op5"></div>
         </div>
+        <div id="op-extra" style="display:none">
+          <div class="row2">
+            <div class="field-group"><label>Operation 6</label><input id="op6" placeholder="Op6"></div>
+            <div class="field-group"><label>Operation 7</label><input id="op7" placeholder="Op7"></div>
+          </div>
+          <div class="row2">
+            <div class="field-group"><label>Operation 8</label><input id="op8" placeholder="Op8"></div>
+            <div class="field-group"><label>Operation 9</label><input id="op9" placeholder="Op9"></div>
+          </div>
+          <div class="row2">
+            <div class="field-group"><label>Operation 10</label><input id="op10" placeholder="Op10"></div>
+            <div class="field-group"></div>
+          </div>
+        </div>
+        <button type="button" id="op-more-btn" class="btn-clear" style="margin-top:2px" onclick="showOpExtra()">➕ เพิ่มช่อง Operation (สูงสุด 10)</button>
 
         <div class="section-label">💊 Non-OR Procedure (ICD-9-CM)</div>
         <div class="field-group"><label>Non-OR 1</label><input id="nop1" placeholder="เช่น 96.04, 89.52, 54.91, 41.31"></div>
@@ -9939,14 +9967,25 @@ function normalizeICD9(code){
 // ════════════════════════════════════════════════════
 // MAIN CALCULATE
 // ════════════════════════════════════════════════════
+const SDX_IDS = [1,2,3,4,5,6,7,8,9,10,11,12];
+const OP_IDS  = [1,2,3,4,5,6,7,8,9,10];
+function showSdxExtra(){
+  document.getElementById("sdx-extra").style.display="grid";
+  document.getElementById("sdx-more-btn").style.display="none";
+}
+function showOpExtra(){
+  document.getElementById("op-extra").style.display="block";
+  document.getElementById("op-more-btn").style.display="none";
+}
+
 function calculate(){
   let pdxRaw = document.getElementById("pdx").value.trim();
   if(!pdxRaw){ alert("กรุณาใส่ PDx (ICD-10)"); return; }
   let pdx = normalizeICD10(pdxRaw);
   document.getElementById("pdx").value = pdx;
-  let sdxList = [1,2,3,4,5,6,7,8,9,10].map(i=>normalizeICD10(document.getElementById("sdx"+i).value)).filter(Boolean);
-  [1,2,3,4,5,6,7,8,9,10].forEach((i,idx)=>{ if(sdxList[idx]) document.getElementById("sdx"+i).value=sdxList[idx]; });
-  let orOps    = [1,2,3,4,5].map(i=>normalizeICD9(document.getElementById("op"+i).value)).filter(Boolean);
+  let sdxList = SDX_IDS.map(i=>normalizeICD10(document.getElementById("sdx"+i).value)).filter(Boolean);
+  SDX_IDS.forEach((i,idx)=>{ document.getElementById("sdx"+i).value = sdxList[idx] || ""; });
+  let orOps    = OP_IDS.map(i=>normalizeICD9(document.getElementById("op"+i).value)).filter(Boolean);
   let nonOrOps = [1,2,3].map(i=>normalizeICD9(document.getElementById("nop"+i).value)).filter(Boolean);
   let ops      = [...orOps, ...nonOrOps];  // รวมทั้งหมดเพื่อเช็ค alerts
   let los      = parseInt(document.getElementById("los").value)||null;
@@ -10042,7 +10081,7 @@ function calculate(){
 }
 
 function clearAll(){
-  ["pdx","sdx1","sdx2","sdx3","sdx4","sdx5","sdx6","sdx7","sdx8","sdx9","sdx10","op1","op2","op3","op4","op5","nop1","nop2","nop3","age","los"].forEach(id=>{
+  ["pdx",...SDX_IDS.map(i=>"sdx"+i),...OP_IDS.map(i=>"op"+i),"nop1","nop2","nop3","age","los"].forEach(id=>{
     document.getElementById(id).value="";
   });
   document.getElementById("dchtype").value="";
@@ -10119,10 +10158,14 @@ async function fetchFromHosxp(){
     clearAll();
     document.getElementById("hosxp-an").value = an;
     document.getElementById("pdx").value = d.pdx || "";
-    (d.sdx||[]).slice(0,10).forEach((c,i)=>{ document.getElementById("sdx"+(i+1)).value = c; });
+    const sdxIn = (d.sdx||[]).slice(0,12);
+    if(sdxIn.length>10) showSdxExtra();
+    sdxIn.forEach((c,i)=>{ document.getElementById("sdx"+(i+1)).value = c; });
     // หัตถการ: ใส่ช่อง Operation 1-5 ก่อน ที่เกินไปลง Non-OR 1-3
-    (d.ops||[]).slice(0,5).forEach((c,i)=>{ document.getElementById("op"+(i+1)).value = c; });
-    (d.ops||[]).slice(5,8).forEach((c,i)=>{ document.getElementById("nop"+(i+1)).value = c; });
+    const opsIn = (d.ops||[]).slice(0,10);
+    if(opsIn.length>5) showOpExtra();
+    opsIn.forEach((c,i)=>{ document.getElementById("op"+(i+1)).value = c; });
+    (d.ops||[]).slice(10,13).forEach((c,i)=>{ document.getElementById("nop"+(i+1)).value = c; });
     if(d.age!=null) document.getElementById("age").value = d.age;
     if(d.los!=null) document.getElementById("los").value = d.los;
     if(d.sex) document.getElementById("sex").value = d.sex;
