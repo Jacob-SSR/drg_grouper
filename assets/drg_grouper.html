@@ -163,6 +163,34 @@
 
   .note-bar { background: #ecfdf5; border-top: 1px solid #a7f3d0; color: #115e59; }
   .alerts-scroll::-webkit-scrollbar-thumb { background: #99f6e4; }
+
+  /* ── UX polish: header 64px · ระยะหายใจ · โทนสี 4 สี · empty state กะทัดรัด ── */
+  .header { padding: 10px 20px; min-height: 64px; }
+  .header h1 { font-size: 18px; margin-bottom: 2px; }
+  .header p { font-size: 12px; }
+  .header .warn-bar { margin: 8px -20px -10px; padding: 4px 20px; font-size: 11px; }
+
+  .main { padding: 20px; gap: 20px; }
+  .card-body { padding: 20px; }
+  .field-group { margin-bottom: 14px; }
+  .field-group label { margin-bottom: 6px; }
+  .section-label { margin: 18px 0 10px; }
+
+  /* โทนสีเหลือ 4: teal หลัก / แดง / เหลือง / เขียว — ม่วง+ฟ้า → teal */
+  .rb-purple { background: #f0fdfa; } .rb-purple .rb-val { color: #0f766e; }
+  .alert-low { background:#f0fdfa; border-color:#14b8a6; }
+  .alert-low .alert-title { color: #0f766e; }
+  .rb-red .rb-val { color:#ef4444; } .rb-amber .rb-val { color:#f59e0b; }
+  .rb-green .rb-val { color:#22c55e; }
+  .tag-mcc { background:#fee2e2; color:#ef4444; }
+  .tag-cc { background:#fef3c7; color:#b45309; }
+
+  .btn-calc { background:#14b8a6; }
+  .btn-calc:hover { background:#0d9488; }
+
+  /* empty state ไม่ต้องกินที่ */
+  .placeholder { padding: 18px 16px; font-size: 13.5px; line-height: 1.8; }
+  .placeholder .big { font-size: 26px; }
 </style>
 </head>
 <body>
@@ -233,32 +261,32 @@
             <input id="sdx4" placeholder="SDx4" autocomplete="off" oninput="searchDiag(this.value,'sdx4-list')" onfocus="searchDiag(this.value,'sdx4-list')">
             <div id="sdx4-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 5</label>
             <input id="sdx5" placeholder="SDx5" autocomplete="off" oninput="searchDiag(this.value,'sdx5-list')" onfocus="searchDiag(this.value,'sdx5-list')">
             <div id="sdx5-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 6</label>
             <input id="sdx6" placeholder="SDx6" autocomplete="off" oninput="searchDiag(this.value,'sdx6-list')" onfocus="searchDiag(this.value,'sdx6-list')">
             <div id="sdx6-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 7</label>
             <input id="sdx7" placeholder="SDx7" autocomplete="off" oninput="searchDiag(this.value,'sdx7-list')" onfocus="searchDiag(this.value,'sdx7-list')">
             <div id="sdx7-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 8</label>
             <input id="sdx8" placeholder="SDx8" autocomplete="off" oninput="searchDiag(this.value,'sdx8-list')" onfocus="searchDiag(this.value,'sdx8-list')">
             <div id="sdx8-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 9</label>
             <input id="sdx9" placeholder="SDx9" autocomplete="off" oninput="searchDiag(this.value,'sdx9-list')" onfocus="searchDiag(this.value,'sdx9-list')">
             <div id="sdx9-list" class="diag-dropdown" style="display:none"></div>
           </div>
-          <div class="field-group" style="position:relative">
+          <div class="field-group sdx-mid" style="position:relative;display:none">
             <label>SDx 10</label>
             <input id="sdx10" placeholder="SDx10" autocomplete="off" oninput="searchDiag(this.value,'sdx10-list')" onfocus="searchDiag(this.value,'sdx10-list')">
             <div id="sdx10-list" class="diag-dropdown" style="display:none"></div>
@@ -284,7 +312,7 @@
           <div class="field-group"><label>Operation 2</label><input id="op2" placeholder="Op2"></div>
           <div class="field-group"><label>Operation 3</label><input id="op3" placeholder="Op3"></div>
         </div>
-        <div class="row2">
+        <div class="row2" id="op-mid" style="display:none">
           <div class="field-group"><label>Operation 4</label><input id="op4" placeholder="Op4"></div>
           <div class="field-group"><label>Operation 5</label><input id="op5" placeholder="Op5"></div>
         </div>
@@ -9969,11 +9997,22 @@ function normalizeICD9(code){
 // ════════════════════════════════════════════════════
 const SDX_IDS = [1,2,3,4,5,6,7,8,9,10,11,12];
 const OP_IDS  = [1,2,3,4,5,6,7,8,9,10];
+function showSdxMid(){
+  document.querySelectorAll(".sdx-mid").forEach(el=>el.style.display="block");
+}
 function showSdxExtra(){
+  const mid = document.querySelector(".sdx-mid");
+  if(mid && mid.style.display==="none"){ showSdxMid(); return; }   // ครั้งแรก: SDx 5-10
+  document.getElementById("sdx-extra").style.display="grid";       // ครั้งที่สอง: SDx 11-12
+  document.getElementById("sdx-more-btn").style.display="none";
+}
+function showSdxAll(){
+  showSdxMid();
   document.getElementById("sdx-extra").style.display="grid";
   document.getElementById("sdx-more-btn").style.display="none";
 }
 function showOpExtra(){
+  document.getElementById("op-mid").style.display="grid";
   document.getElementById("op-extra").style.display="block";
   document.getElementById("op-more-btn").style.display="none";
 }
@@ -10159,11 +10198,12 @@ async function fetchFromHosxp(){
     document.getElementById("hosxp-an").value = an;
     document.getElementById("pdx").value = d.pdx || "";
     const sdxIn = (d.sdx||[]).slice(0,12);
-    if(sdxIn.length>10) showSdxExtra();
+    if(sdxIn.length>10) showSdxAll();
+    else if(sdxIn.length>4) showSdxMid();
     sdxIn.forEach((c,i)=>{ document.getElementById("sdx"+(i+1)).value = c; });
     // หัตถการ: ใส่ช่อง Operation 1-5 ก่อน ที่เกินไปลง Non-OR 1-3
     const opsIn = (d.ops||[]).slice(0,10);
-    if(opsIn.length>5) showOpExtra();
+    if(opsIn.length>3) showOpExtra();
     opsIn.forEach((c,i)=>{ document.getElementById("op"+(i+1)).value = c; });
     (d.ops||[]).slice(10,13).forEach((c,i)=>{ document.getElementById("nop"+(i+1)).value = c; });
     if(d.age!=null) document.getElementById("age").value = d.age;

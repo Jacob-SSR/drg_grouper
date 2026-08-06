@@ -95,6 +95,42 @@ tr:hover td{background:#f0fdfa}
 .col-map h3{color:#115e59}
 .col-map label{color:#428f87}
 .col-map select{border-color:#99f6e4;border-radius:8px;font-family:inherit}
+
+/* ── UX polish: header กะทัดรัด · KPI · sticky thead · skeleton · pagination ── */
+header{padding:10px 20px;min-height:64px}
+header h1{font-size:1.05rem}
+header h1 span{font-size:.8rem}
+.container{padding:16px 20px}
+
+.stat{padding:16px 18px;text-align:left;display:flex;align-items:center;gap:12px}
+.stat .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.stat .num{font-size:1.7rem;line-height:1.1}
+.stat .lbl{margin-top:0;font-size:.78rem}
+.s-total .ic{background:#ccfbf1;color:#115e59}
+.s-clean .ic{background:#dcfce7;color:#15803d}
+.s-med .ic{background:#fef3c7;color:#b45309}
+.s-high .ic{background:#fee2e2;color:#b91c1c}
+.s-high .num{color:#ef4444}.s-med .num{color:#f59e0b}.s-clean .num{color:#22c55e}
+
+.table-wrap{max-height:65vh;overflow:auto;border-radius:14px;box-shadow:0 6px 20px rgba(13,148,136,.08)}
+.table-wrap table{box-shadow:none;border-radius:0}
+th{position:sticky;top:0;z-index:2}
+tr:hover td{background:#ccfbf1 !important;cursor:default}
+
+.tag-pdx{background:#dbeafe;color:#1d4ed8}
+.tag-code{background:#ede9fe;color:#6d28d9}
+.tag-op{background:#ffedd5;color:#c2410c}
+.tag-cr{background:#fee2e2;color:#dc2626}
+.tag-ea{background:#fef3c7;color:#b45309}
+.tag-ok{background:#dcfce7;color:#15803d}
+
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skel{display:inline-block;border-radius:8px;background:linear-gradient(90deg,#e6f7f2 25%,#f4fdfa 37%,#e6f7f2 63%);background-size:400px 100%;animation:shimmer 1.2s infinite linear;color:transparent !important}
+
+.pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:12px 4px;font-size:.85rem;color:#428f87;flex-wrap:wrap}
+.pager button{border:1.5px solid #99f6e4;background:#fff;color:#0f766e;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem}
+.pager button:disabled{opacity:.4;cursor:not-allowed}
+.pager button.cur{background:#0d9488;color:#fff;border-color:#0d9488}
 </style>
 </head>
 <body>
@@ -142,11 +178,11 @@ tr:hover td{background:#f0fdfa}
 
 <!-- Results -->
 <div id="resultSection">
-  <div class="stats">
-    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">เคสทั้งหมด</div></div>
-    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 เสี่ยงสูง รีบดูก่อน</div></div>
-    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ควรตรวจทาน</div></div>
-    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ไม่พบปัญหา</div></div>
+  <div class="stats" id="kpiRow">
+    <div class="stat s-total"><div class="ic">📋</div><div><div class="num" id="cntTotal">0</div><div class="lbl">เคสทั้งหมด</div></div></div>
+    <div class="stat s-clean"><div class="ic">✓</div><div><div class="num" id="cntClean">0</div><div class="lbl">ไม่พบปัญหา</div></div></div>
+    <div class="stat s-med"><div class="ic">⚠</div><div><div class="num" id="cntMed">0</div><div class="lbl">ควรตรวจทาน</div></div></div>
+    <div class="stat s-high"><div class="ic">✕</div><div><div class="num" id="cntHigh">0</div><div class="lbl">เสี่ยงสูง รีบดูก่อน</div></div></div>
   </div>
   <div class="bar">
     <input type="text" id="srch" placeholder="🔍 ค้นหา HN / AN / รหัส..." oninput="renderTable()" style="width:220px">
@@ -179,7 +215,7 @@ tr:hover td{background:#f0fdfa}
     <button class="btn btn-green" onclick="exportExcel()">📥 Export Excel</button>
     <button class="btn btn-gray" onclick="location.reload()">↺ โหลดใหม่</button>
   </div>
-  <div style="overflow-x:auto">
+  <div class="table-wrap">
     <table id="resultTable">
       <thead>
         <tr>
@@ -191,6 +227,7 @@ tr:hover td{background:#f0fdfa}
       <tbody id="resultBody"></tbody>
     </table>
   </div>
+  <div class="pager" id="pager"></div>
 </div>
 </div>
 
@@ -438,12 +475,16 @@ function runCheck(){
   renderTable();
 }
 
-function renderTable(){
+const PAGE_SIZE = 50;
+let pageNo = 1, lastFilterKey = '';
+
+function filteredRows(){
   const srch = document.getElementById('srch').value.toLowerCase();
   const fRisk= document.getElementById('fltRisk').value;
   const fCode= document.getElementById('fltCode').value;
-
-  let rows = checkedResults.filter(r=>{
+  const key = srch+'|'+fRisk+'|'+fCode;
+  if(key !== lastFilterKey){ pageNo = 1; lastFilterKey = key; }
+  return checkedResults.filter(r=>{
     if(fRisk && r.sev!==fRisk) return false;
     if(fCode && !r.flags.some(f=>f.code.startsWith(fCode))) return false;
     if(srch){
@@ -452,25 +493,53 @@ function renderTable(){
     }
     return true;
   });
+}
 
+function goPage(n){ pageNo = n; renderTable(); document.querySelector('.table-wrap').scrollTop = 0; }
+
+function renderPager(total){
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if(pageNo > pages) pageNo = pages;
+  const el = document.getElementById('pager');
+  if(total <= PAGE_SIZE){ el.innerHTML = total ? `ทั้งหมด ${total} เคส` : ''; return; }
+  const from = (pageNo-1)*PAGE_SIZE+1, to = Math.min(pageNo*PAGE_SIZE, total);
+  let btns = '';
+  const win = [];
+  for(let i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-pageNo)<=2) win.push(i);
+    else if(win[win.length-1]!=='…') win.push('…');
+  }
+  for(const i of win){
+    btns += i==='…' ? `<span>…</span>` : `<button class="${i===pageNo?'cur':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  el.innerHTML = `แสดง ${from}–${to} จาก ${total} เคส
+    <button onclick="goPage(${pageNo-1})" ${pageNo<=1?'disabled':''}>‹ ก่อนหน้า</button>
+    ${btns}
+    <button onclick="goPage(${pageNo+1})" ${pageNo>=pages?'disabled':''}>ถัดไป ›</button>`;
+}
+
+function renderTable(){
+  const rows = filteredRows();
   const tbody=document.getElementById('resultBody');
+  renderPager(rows.length);
   if(!rows.length){
     tbody.innerHTML=`<tr><td colspan="12" class="empty"><h3>ไม่พบข้อมูล</h3><p>ลองเปลี่ยนตัวกรอง</p></td></tr>`;
     return;
   }
 
-  tbody.innerHTML = rows.map((r,i)=>{
+  const page = rows.slice((pageNo-1)*PAGE_SIZE, pageNo*PAGE_SIZE);
+  tbody.innerHTML = page.map((r,i)=>{
     const cls = r.sev==='high'?'risk-high':r.sev==='medium'?'risk-med':'risk-clean';
-    const sev = r.sev==='high'?'<span style="color:#e53e3e;font-weight:700">🔴 สูง</span>':r.sev==='medium'?'<span style="color:#dd6b20;font-weight:700">🟡 กลาง</span>':'<span style="color:#38a169">✅ ผ่าน</span>';
+    const sev = r.sev==='high'?'<span style="color:#ef4444;font-weight:700">🔴 สูง</span>':r.sev==='medium'?'<span style="color:#f59e0b;font-weight:700">🟡 กลาง</span>':'<span style="color:#22c55e">✅ ผ่าน</span>';
     const tags = r.flags.length?r.flags.map(f=>`<span class="tag ${f.code.startsWith('CR')?'tag-cr':'tag-ea'}">${f.code}</span>`).join(''):'<span class="tag tag-ok">Clean</span>';
     const details = r.flags.length?`<ul class="detail-list">${r.flags.map(f=>`<li>${f.msg}</li>`).join('')}</ul>`:'';
     return `<tr class="${cls}">
       <td>${r.idx}</td>
       <td><code style="font-size:.8rem">${r.hn}</code></td>
       <td><code style="font-size:.8rem">${r.an}</code></td>
-      <td><span class="tag tag-code">${r.pdx}</span></td>
+      <td><span class="tag tag-pdx">${r.pdx}</span></td>
       <td style="max-width:120px">${r.sdx.map(s=>`<span class="tag tag-code">${s}</span>`).join('')}</td>
-      <td style="max-width:120px">${r.ops.map(s=>`<span class="tag" style="background:#bee3f8;color:#2a4365">${s}</span>`).join('')}</td>
+      <td style="max-width:120px">${r.ops.map(s=>`<span class="tag tag-op">${s}</span>`).join('')}</td>
       <td>${r.los}</td>
       <td>${r.dchtype}</td>
       <td>${r.typehosp}</td>
@@ -532,6 +601,27 @@ async function doLogout(){
 })();
 
 // ดึงเคสจำหน่ายจาก HOSxP → ป้อนเข้า pipeline เดิม (autoDetect + runCheck)
+
+// Skeleton loading ระหว่างรอข้อมูลจาก HOSxP
+function showSkeleton(){
+  document.getElementById('resultSection').style.display='block';
+  ['cntTotal','cntClean','cntMed','cntHigh'].forEach(id=>{
+    const el=document.getElementById(id); el.textContent='000'; el.classList.add('skel');
+  });
+  document.getElementById('pager').innerHTML='';
+  document.getElementById('resultBody').innerHTML =
+    Array.from({length:8},()=>`<tr>${Array.from({length:12},()=>`<td><span class="skel" style="width:${40+Math.round(Math.random()*50)}px">&nbsp;</span></td>`).join('')}</tr>`).join('');
+}
+function hideSkeleton(){
+  ['cntTotal','cntClean','cntMed','cntHigh'].forEach(id=>document.getElementById(id).classList.remove('skel'));
+  // ดึงไม่สำเร็จ (ยังไม่มีผลตรวจ) → ซ่อนตารางโครงไว้เหมือนเดิม
+  if(!checkedResults.length){
+    document.getElementById('resultSection').style.display='none';
+    document.getElementById('resultBody').innerHTML='';
+    ['cntTotal','cntClean','cntMed','cntHigh'].forEach(id=>document.getElementById(id).textContent='0');
+  }
+}
+
 async function fetchHosxpCases(){
   const start = document.getElementById('hosxp-start').value;
   const end   = document.getElementById('hosxp-end').value;
@@ -539,6 +629,7 @@ async function fetchHosxpCases(){
   const btn   = document.getElementById('hosxp-btn');
   if(!start || !end){ st.textContent='อย่าลืมเลือกช่วงวันที่ก่อนนะ'; st.style.color='#e53e3e'; return; }
   btn.disabled = true; st.style.color='#718096'; st.textContent='แป๊บนึงนะ กำลังดึงเคสจาก HOSxP…';
+  showSkeleton();
   try {
     const r = await fetch(`/api/hosxp/cases?start=${start}&end=${end}`);
     if(r.status===401){ location.href='/login'; return; }
@@ -557,6 +648,7 @@ async function fetchHosxpCases(){
     st.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'; st.style.color='#e53e3e';
   } finally {
     btn.disabled = false;
+    hideSkeleton();
   }
 }
 </script>

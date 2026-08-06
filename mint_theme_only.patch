@@ -1,0 +1,636 @@
+From 275a3fb99abd94739c853a7a1df07a04fcf74175 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 6 Aug 2026 06:54:57 +0000
+Subject: [PATCH] =?UTF-8?q?style:=20=E0=B8=98=E0=B8=B5=E0=B8=A1=E0=B8=A1?=
+ =?UTF-8?q?=E0=B8=B4=E0=B9=89=E0=B8=99=E0=B8=95=E0=B9=8C=E0=B8=9E=E0=B8=B2?=
+ =?UTF-8?q?=E0=B8=AA=E0=B9=80=E0=B8=97=E0=B8=A5=20+=20=E0=B8=9F=E0=B8=AD?=
+ =?UTF-8?q?=E0=B8=99=E0=B8=95=E0=B9=8C=20Prompt=20+=20=E0=B8=9B=E0=B8=A3?=
+ =?UTF-8?q?=E0=B8=B1=E0=B8=9A=E0=B8=82=E0=B9=89=E0=B8=AD=E0=B8=84=E0=B8=A7?=
+ =?UTF-8?q?=E0=B8=B2=E0=B8=A1=E0=B9=80=E0=B8=9B=E0=B9=87=E0=B8=99=E0=B8=A0?=
+ =?UTF-8?q?=E0=B8=B2=E0=B8=A9=E0=B8=B2=E0=B8=84=E0=B8=99?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- ทุกหน้า (home, login, DRG, Deny Code) ใช้ฟอนต์ Prompt และโทนสีมิ้นต์พาสเทล
+  เดียวกัน — override ธีมเดิมของหน้าเครื่องมือด้วย style block เดียว
+- เขียนข้อความใหม่ให้อ่านรู้เรื่อง: หัวเรื่อง คำอธิบาย ปุ่ม สถานะ
+  และ label สถิติ เลิกใช้ศัพท์ระบบ
+- หน้า home ใหม่: ทักทายตามชื่อผู้ใช้ + การ์ดเลือกเครื่องมือ 2 ใบ
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_0171ADXnq2vgF7JaukKByySf
+---
+ app/layout.js                 |  14 +++-
+ app/login/page.js             |  77 ++++++++++++-------
+ app/page.js                   | 139 ++++++++++++++++++++++------------
+ assets/deny_code_checker.html |  72 ++++++++++++++----
+ assets/drg_grouper.html       |  69 ++++++++++++++---
+ 5 files changed, 265 insertions(+), 106 deletions(-)
+
+diff --git a/app/layout.js b/app/layout.js
+index 8d492f9..2d9a3e9 100644
+--- a/app/layout.js
++++ b/app/layout.js
+@@ -1,13 +1,21 @@
+ export const metadata = {
+-  title: "PPC Coding Tools — DRG Grouper + Deny Code Checker",
++  title: "PPC Coding Tools — เช็ก DRG + Deny Code ก่อนส่งเบิก",
+   description:
+-    "เครื่องมือ Coding/เคลม: DRG Grouper และ Deny Code Checker — ข้อมูลจริงจาก HOSxP",
++    "เครื่องมือช่วยงานเคลม: เช็ก DRG/RW และรหัสเสี่ยงโดนปฏิเสธ (Deny Code) จากข้อมูลจริงใน HOSxP",
+ };
+ 
+ export default function RootLayout({ children }) {
+   return (
+     <html lang="th">
+-      <body style={{ margin: 0 }}>{children}</body>
++      <head>
++        <link rel="preconnect" href="https://fonts.googleapis.com" />
++        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
++        <link
++          href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
++          rel="stylesheet"
++        />
++      </head>
++      <body style={{ margin: 0, fontFamily: "'Prompt', sans-serif" }}>{children}</body>
+     </html>
+   );
+ }
+diff --git a/app/login/page.js b/app/login/page.js
+index 28568f8..0f973ae 100644
+--- a/app/login/page.js
++++ b/app/login/page.js
+@@ -2,20 +2,30 @@
+ 
+ import { useState } from "react";
+ 
++const mint = {
++  bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
++  ink: "#134e4a",
++  soft: "#5eead4",
++  teal: "#0d9488",
++  tealDark: "#0f766e",
++  sub: "#428f87",
++};
++
+ const styles = {
+   wrap: {
+     minHeight: "100vh",
+     display: "flex",
+     alignItems: "center",
+     justifyContent: "center",
+-    background: "linear-gradient(135deg,#0f172a,#1e3a8a 60%,#0f766e)",
+-    fontFamily: "'Segoe UI', Tahoma, 'TH Sarabun New', sans-serif",
++    background: mint.bg,
++    fontFamily: "'Prompt', sans-serif",
+     padding: 16,
+   },
+   card: {
+-    background: "#fff",
+-    borderRadius: 18,
+-    boxShadow: "0 20px 60px rgba(0,0,0,.35)",
++    background: "rgba(255,255,255,.9)",
++    borderRadius: 22,
++    border: "1.5px solid #ccfbf1",
++    boxShadow: "0 12px 40px rgba(13,148,136,.14)",
+     padding: "38px 34px",
+     width: "100%",
+     maxWidth: 400,
+@@ -24,28 +34,32 @@ const styles = {
+     width: "100%",
+     boxSizing: "border-box",
+     padding: "12px 14px",
+-    border: "2px solid #e2e8f0",
+-    borderRadius: 10,
++    border: "1.5px solid #99f6e4",
++    borderRadius: 12,
+     fontSize: 15,
+     outline: "none",
+     marginBottom: 16,
++    fontFamily: "inherit",
++    background: "#fdfefe",
++    color: mint.ink,
+   },
+   btn: {
+     width: "100%",
+     padding: 13,
+     border: "none",
+-    borderRadius: 10,
+-    background: "#2563eb",
++    borderRadius: 12,
++    background: mint.teal,
+     color: "#fff",
+     fontSize: 15,
+-    fontWeight: 700,
++    fontWeight: 600,
+     cursor: "pointer",
++    fontFamily: "inherit",
+   },
+   label: {
+     display: "block",
+     fontSize: 13,
+-    fontWeight: 600,
+-    color: "#334155",
++    fontWeight: 500,
++    color: mint.tealDark,
+     marginBottom: 6,
+   },
+ };
+@@ -73,11 +87,11 @@ export default function LoginPage() {
+       }
+       setError(
+         r.status === 429
+-          ? data.error || "พยายามบ่อยเกินไป กรุณารอสักครู่"
+-          : "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
++          ? data.error || "ลองบ่อยไปนิดนึง พักสักครู่แล้วลองใหม่นะ"
++          : "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง ลองอีกครั้งนะ",
+       );
+     } catch {
+-      setError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่");
++      setError("ต่อเซิร์ฟเวอร์ไม่ติด ลองใหม่อีกครั้งนะ");
+     } finally {
+       setBusy(false);
+     }
+@@ -86,19 +100,28 @@ export default function LoginPage() {
+   return (
+     <div style={styles.wrap}>
+       <form style={styles.card} onSubmit={submit}>
+-        <div style={{ textAlign: "center", fontSize: 44, marginBottom: 8 }}>🏥</div>
+-        <h1 style={{ textAlign: "center", fontSize: 20, color: "#0f172a", margin: "0 0 4px" }}>
+-          PPC Coding Tools
++        <div style={{ textAlign: "center", fontSize: 46, marginBottom: 6 }}>🌿</div>
++        <h1
++          style={{
++            textAlign: "center",
++            fontSize: 21,
++            color: mint.ink,
++            margin: "0 0 4px",
++            fontWeight: 600,
++          }}
++        >
++          ยินดีต้อนรับกลับมา 👋
+         </h1>
+-        <div style={{ textAlign: "center", fontSize: 13, color: "#64748b", marginBottom: 26 }}>
+-          DRG Grouper + Deny Code Checker — เข้าสู่ระบบด้วยบัญชีโรงพยาบาล
++        <div style={{ textAlign: "center", fontSize: 13.5, color: mint.sub, marginBottom: 26 }}>
++          เข้าสู่ระบบก่อน แล้วไปเช็ก DRG กับ Deny Code กันเลย
+         </div>
+         {error && (
+           <div
+             style={{
+-              background: "#fee2e2",
+-              color: "#b91c1c",
+-              borderRadius: 8,
++              background: "#fff1f2",
++              color: "#be123c",
++              border: "1px solid #fecdd3",
++              borderRadius: 10,
+               padding: "10px 12px",
+               fontSize: 13,
+               marginBottom: 14,
+@@ -127,11 +150,11 @@ export default function LoginPage() {
+           autoComplete="current-password"
+           required
+         />
+-        <button style={styles.btn} disabled={busy} type="submit">
+-          {busy ? "กำลังตรวจสอบ…" : "เข้าสู่ระบบ"}
++        <button style={{ ...styles.btn, opacity: busy ? 0.6 : 1 }} disabled={busy} type="submit">
++          {busy ? "แป๊บนึงนะ กำลังตรวจสอบ…" : "เข้าสู่ระบบ"}
+         </button>
+-        <div style={{ textAlign: "center", fontSize: 12, color: "#94a3b8", marginTop: 18 }}>
+-          ใช้บัญชีเดียวกับระบบรายงานของโรงพยาบาล (ppchos)
++        <div style={{ textAlign: "center", fontSize: 12.5, color: "#7fb5ae", marginTop: 18 }}>
++          ใช้บัญชีเดียวกับระบบรายงานของโรงพยาบาลได้เลย ไม่ต้องสมัครใหม่
+         </div>
+       </form>
+     </div>
+diff --git a/app/page.js b/app/page.js
+index 7e99598..6111076 100644
+--- a/app/page.js
++++ b/app/page.js
+@@ -2,30 +2,40 @@
+ 
+ import { useEffect, useState } from "react";
+ 
++// ── ธีมมิ้นต์พาสเทล ──
++const mint = {
++  bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
++  ink: "#134e4a",
++  soft: "#5eead4",
++  teal: "#0d9488",
++  tealDark: "#0f766e",
++  sub: "#428f87",
++};
++
+ const wrap = {
+   minHeight: "100vh",
+-  fontFamily: "'Segoe UI', Tahoma, 'TH Sarabun New', sans-serif",
+-  background: "linear-gradient(135deg,#0f172a,#1e3a8a 60%,#0f766e)",
++  fontFamily: "'Prompt', sans-serif",
++  background: mint.bg,
+   display: "flex",
+   flexDirection: "column",
+   alignItems: "center",
+   justifyContent: "center",
+-  padding: 20,
+-  color: "#fff",
++  padding: 24,
++  color: mint.ink,
+ };
+ 
+-const cardRow = { display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" };
+-
+ const card = {
+-  background: "#fff",
+-  color: "#0f172a",
+-  borderRadius: 18,
++  background: "rgba(255,255,255,.85)",
++  backdropFilter: "blur(6px)",
++  color: mint.ink,
++  borderRadius: 22,
++  border: "1.5px solid #ccfbf1",
+   padding: "30px 28px",
+-  width: 320,
++  width: 330,
+   textDecoration: "none",
+-  boxShadow: "0 20px 60px rgba(0,0,0,.35)",
+-  transition: "transform .15s",
++  boxShadow: "0 12px 32px rgba(13,148,136,.12)",
+   display: "block",
++  transition: "transform .15s, box-shadow .15s",
+ };
+ 
+ export default function Home() {
+@@ -53,52 +63,81 @@ export default function Home() {
+ 
+   return (
+     <div style={wrap}>
+-      <h1 style={{ fontSize: 30, marginBottom: 6 }}>🏥 PPC Coding Tools</h1>
+-      <p style={{ opacity: 0.85, marginBottom: 8 }}>
+-        เครื่องมือ Coding / เคลม — ข้อมูลจริงจาก HOSxP
+-      </p>
+-      <p style={{ fontSize: 13, opacity: 0.75, marginBottom: 28 }}>
+-        {user ? `👤 ${user.name} (${user.role})` : "…"}
+-        {user && (
+-          <button
+-            onClick={logout}
+-            style={{
+-              marginLeft: 12,
+-              background: "rgba(255,255,255,.15)",
+-              border: "1px solid rgba(255,255,255,.4)",
+-              color: "#fff",
+-              borderRadius: 8,
+-              padding: "4px 12px",
+-              cursor: "pointer",
+-              fontSize: 12,
+-            }}
+-          >
+-            ออกจากระบบ
+-          </button>
+-        )}
++      <div style={{ fontSize: 52, marginBottom: 4 }}>🌿</div>
++      <h1 style={{ fontSize: 28, margin: "0 0 6px", fontWeight: 600 }}>
++        สวัสดี{user ? ` คุณ${user.name}` : ""} 👋
++      </h1>
++      <p style={{ color: mint.sub, margin: "0 0 30px", fontSize: 15, textAlign: "center" }}>
++        วันนี้อยากตรวจอะไรก่อนส่งเบิกดี?
+       </p>
+ 
+-      <div style={cardRow}>
+-        <a href="/tools/drg" style={card}>
+-          <div style={{ fontSize: 40 }}>🧮</div>
+-          <h2 style={{ fontSize: 19, margin: "10px 0 6px" }}>DRG Grouper จำลอง</h2>
+-          <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+-            ประมาณการ MDC · DRG · RW · CC/MCC พร้อมแจ้งเตือน DENY CODE —
+-            กรอก AN ดึงข้อมูลจริงจาก HOSxP มาเติมฟอร์มอัตโนมัติ
++      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
++        <a
++          href="/tools/drg"
++          style={card}
++          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
++          onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
++        >
++          <div style={{ fontSize: 38 }}>🧮</div>
++          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
++            เช็ก DRG และค่า RW
++          </h2>
++          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
++            ใส่เลข AN แล้วระบบดึงข้อมูลจาก HOSxP มาให้เอง
++            บอกกลุ่ม DRG ค่า RW โดยประมาณ พร้อมชี้จุดที่เสี่ยงถูกตัดยอด
+           </p>
++          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
++            เริ่มเช็กเลย →
++          </div>
+         </a>
+-        <a href="/tools/deny" style={card}>
+-          <div style={{ fontSize: 40 }}>🔍</div>
+-          <h2 style={{ fontSize: 19, margin: "10px 0 6px" }}>Deny Code Checker</h2>
+-          <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+-            ตรวจความเสี่ยง DENY CODE ก่อนส่งเบิก สปสช. —
+-            ดึงเคสจำหน่ายตามช่วงวันที่จาก HOSxP หรืออัปโหลด Excel
++
++        <a
++          href="/tools/deny"
++          style={card}
++          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
++          onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
++        >
++          <div style={{ fontSize: 38 }}>🔍</div>
++          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
++            ตรวจรหัสเสี่ยงโดนปฏิเสธ
++          </h2>
++          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
++            เลือกช่วงวันที่จำหน่าย ระบบดึงเคสจาก HOSxP มาตรวจให้ทั้งชุด
++            ว่ามีรหัสไหนเสี่ยงโดน สปสช. ปฏิเสธบ้าง
+           </p>
++          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
++            เริ่มตรวจเลย →
++          </div>
+         </a>
+       </div>
+ 
+-      <p style={{ fontSize: 12, opacity: 0.6, marginTop: 30 }}>
+-        ⚠️ ค่า RW / ผลตรวจเป็นเครื่องมือช่วยคัดกรองเท่านั้น ไม่ใช่ผลอย่างเป็นทางการ
++      <div style={{ marginTop: 34, display: "flex", alignItems: "center", gap: 12 }}>
++        {user && (
++          <>
++            <span style={{ fontSize: 13, color: mint.sub }}>
++              เข้าใช้งานในชื่อ {user.name} ({user.role})
++            </span>
++            <button
++              onClick={logout}
++              style={{
++                background: "#fff",
++                border: `1.5px solid ${mint.soft}`,
++                color: mint.tealDark,
++                borderRadius: 999,
++                padding: "6px 16px",
++                cursor: "pointer",
++                fontSize: 13,
++                fontFamily: "inherit",
++              }}
++            >
++              ออกจากระบบ
++            </button>
++          </>
++        )}
++      </div>
++
++      <p style={{ fontSize: 12, color: "#7fb5ae", marginTop: 26, textAlign: "center" }}>
++        ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทานเท่านั้น ผลจริงยึดตามระบบของ สปสช.
+       </p>
+     </div>
+   );
+diff --git a/assets/deny_code_checker.html b/assets/deny_code_checker.html
+index c8b1377..835c90f 100644
+--- a/assets/deny_code_checker.html
++++ b/assets/deny_code_checker.html
+@@ -3,7 +3,7 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>Denile code checker program BY Dr.OraPat</title>
++<title>ตรวจรหัสเสี่ยงโดนปฏิเสธ (Deny Code) — PPC Coding Tools</title>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+ <style>
+ *{box-sizing:border-box;margin:0;padding:0}
+@@ -54,11 +54,53 @@ tr:hover td{background:#ebf8ff}
+ .detail-list li{margin-bottom:2px;list-style:none;padding-left:10px;position:relative}
+ .detail-list li::before{content:"→";position:absolute;left:0;color:#a0aec0}
+ </style>
++<link rel="preconnect" href="https://fonts.googleapis.com">
++<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
++<style id="mint-theme">
++/* ═══ ธีมมิ้นต์พาสเทล + ฟอนต์ Prompt (override ธีมเดิมทั้งหน้า) ═══ */
++body{font-family:'Prompt',sans-serif;background:linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%);color:#134e4a}
++header{background:linear-gradient(135deg,#99f6e4 0%,#a7f3d0 100%);color:#115e59}
++header h1{font-weight:600}
++header h1 span{color:#0f766e}
++.badge{background:#0d9488}
++header a,header button{color:#0f766e !important;border:1.5px solid #5eead4 !important;background:rgba(255,255,255,.65) !important;font-family:inherit}
++header #user-name{color:#115e59}
++
++.upload-zone{border-color:#5eead4;border-radius:18px;background:rgba(255,255,255,.85)}
++.upload-zone:hover{border-color:#0d9488;background:#f0fdfa}
++.upload-zone h2{color:#115e59}
++.upload-zone p{color:#428f87}
++
++.bar{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
++.bar input,.bar select{border-color:#99f6e4;border-radius:10px;background:#fdfefe;color:#134e4a;font-family:inherit}
++.bar input:focus,.bar select:focus{border-color:#14b8a6}
++
++.btn{font-family:inherit;border-radius:10px}
++.btn-primary{background:#0d9488}.btn-primary:hover{background:#0f766e}
++.btn-blue{background:#14b8a6}.btn-blue:hover{background:#0d9488}
++.btn-green{background:#10b981}.btn-green:hover{background:#059669}
++.btn-gray{background:#f0fdfa;color:#0f766e}.btn-gray:hover{background:#ccfbf1}
++
++.stat{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
++.stat .lbl{color:#428f87}
++.s-total .num{color:#115e59}
++
++table{border-radius:14px;box-shadow:0 6px 20px rgba(13,148,136,.08)}
++th{background:#ccfbf1;color:#115e59}
++td{border-bottom:1px solid #ecfdf5}
++tr:hover td{background:#f0fdfa}
++
++.col-map{border-radius:14px;border:1.5px solid #ccfbf1;box-shadow:0 6px 20px rgba(13,148,136,.08)}
++.col-map h3{color:#115e59}
++.col-map label{color:#428f87}
++.col-map select{border-color:#99f6e4;border-radius:8px;font-family:inherit}
++</style>
+ </head>
+ <body>
+ <header>
+   <div>🔍</div>
+-  <h1>Denile code checker program <span>By Dr.OraPat</span></h1>
++  <h1>ตรวจรหัสเสี่ยงโดนปฏิเสธ (Deny Code) <span>by Dr.OraPat</span></h1>
+   <span class="badge">สปสช. AI Pre-Audit v2567</span>
+   <div style="margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.8rem">
+     <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:.75rem;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
+@@ -71,29 +113,29 @@ tr:hover td{background:#ebf8ff}
+ 
+ <!-- HOSxP direct fetch -->
+ <div class="bar" style="border:2px solid #0f766e;background:#f0fdfa">
+-  <strong style="font-size:.9rem;color:#0f766e">📥 ดึงข้อมูลจริงจาก HOSxP</strong>
++  <strong style="font-size:.9rem;color:#0f766e">📥 ดึงเคสจริงจาก HOSxP มาตรวจ</strong>
+   <label style="font-size:.8rem;color:#4a5568">วันที่จำหน่าย:</label>
+   <input type="date" id="hosxp-start">
+   <span style="color:#718096">ถึง</span>
+   <input type="date" id="hosxp-end">
+-  <button class="btn btn-green" id="hosxp-btn" onclick="fetchHosxpCases()">▶ ดึงและตรวจสอบทันที</button>
++  <button class="btn btn-green" id="hosxp-btn" onclick="fetchHosxpCases()">ตรวจให้เลย</button>
+   <span id="hosxp-status" style="font-size:.8rem;color:#718096"></span>
+ </div>
+ 
+ <!-- Upload -->
+ <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+   <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
+-  <h2>📂 อัปโหลดไฟล์ Excel / CSV จาก HosXP</h2>
+-  <p>คลิกหรือลากไฟล์มาวาง · รองรับ .xlsx .xls .csv</p>
+-  <p style="margin-top:8px;color:#e94560;font-size:.8rem">deny_code_sample.xlsx หรือ Export จาก HosXP ได้เลย</p>
++  <h2>📂 หรืออัปโหลดไฟล์ Excel / CSV เองก็ได้</h2>
++  <p>คลิกหรือลากไฟล์มาวางตรงนี้ได้เลย · รองรับ .xlsx .xls .csv</p>
++  <p style="margin-top:8px;color:#0d9488;font-size:.8rem">ใช้ไฟล์ที่ Export จาก HOSxP ได้เลย ระบบจับคู่คอลัมน์ให้เอง</p>
+ </div>
+ 
+ <!-- Column mapping -->
+ <div id="mappingSection" class="col-map">
+-  <h3>🗺️ Column Mapping — ตรวจสอบและแก้ไขได้</h3>
++  <h3>🗺️ จับคู่คอลัมน์ให้แล้ว — แก้ได้ถ้าไม่ตรง</h3>
+   <div class="grid" id="mappingGrid"></div>
+   <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+-    <button class="btn btn-primary" onclick="runCheck()">▶ เริ่มตรวจสอบ</button>
++    <button class="btn btn-primary" onclick="runCheck()">เริ่มตรวจเลย</button>
+     <button class="btn btn-gray" onclick="location.reload()">↺ โหลดใหม่</button>
+   </div>
+ </div>
+@@ -101,10 +143,10 @@ tr:hover td{background:#ebf8ff}
+ <!-- Results -->
+ <div id="resultSection">
+   <div class="stats">
+-    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">ทั้งหมด</div></div>
+-    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 ความเสี่ยงสูง</div></div>
+-    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ความเสี่ยงกลาง</div></div>
+-    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ผ่านการตรวจ</div></div>
++    <div class="stat s-total"><div class="num" id="cntTotal">0</div><div class="lbl">เคสทั้งหมด</div></div>
++    <div class="stat s-high"><div class="num" id="cntHigh">0</div><div class="lbl">🔴 เสี่ยงสูง รีบดูก่อน</div></div>
++    <div class="stat s-med"><div class="num" id="cntMed">0</div><div class="lbl">🟡 ควรตรวจทาน</div></div>
++    <div class="stat s-clean"><div class="num" id="cntClean">0</div><div class="lbl">✅ ไม่พบปัญหา</div></div>
+   </div>
+   <div class="bar">
+     <input type="text" id="srch" placeholder="🔍 ค้นหา HN / AN / รหัส..." oninput="renderTable()" style="width:220px">
+@@ -495,8 +537,8 @@ async function fetchHosxpCases(){
+   const end   = document.getElementById('hosxp-end').value;
+   const st    = document.getElementById('hosxp-status');
+   const btn   = document.getElementById('hosxp-btn');
+-  if(!start || !end){ st.textContent='กรุณาเลือกช่วงวันที่'; st.style.color='#e53e3e'; return; }
+-  btn.disabled = true; st.style.color='#718096'; st.textContent='กำลังดึงข้อมูลจาก HOSxP…';
++  if(!start || !end){ st.textContent='อย่าลืมเลือกช่วงวันที่ก่อนนะ'; st.style.color='#e53e3e'; return; }
++  btn.disabled = true; st.style.color='#718096'; st.textContent='แป๊บนึงนะ กำลังดึงเคสจาก HOSxP…';
+   try {
+     const r = await fetch(`/api/hosxp/cases?start=${start}&end=${end}`);
+     if(r.status===401){ location.href='/login'; return; }
+diff --git a/assets/drg_grouper.html b/assets/drg_grouper.html
+index 029ce60..0701d02 100644
+--- a/assets/drg_grouper.html
++++ b/assets/drg_grouper.html
+@@ -3,7 +3,7 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>DRG Grouper จำลอง + แจ้งเตือนแพทย์ BY Dr.OraPat</title>
++<title>เช็ก DRG + RW ก่อนส่งเบิก — PPC Coding Tools</title>
+ <style>
+   * { box-sizing: border-box; margin: 0; padding: 0; }
+   body { font-family: 'TH Sarabun New', Sarabun, sans-serif; font-size: 16px; background: #f1f5f9; color: #1e293b; }
+@@ -117,13 +117,60 @@
+   .diag-name { font-size: 13px; color: #374151; line-height: 1.4; }
+   .diag-name small { color: #94a3b8; font-size: 11px; display: block; }
+ </style>
++<link rel="preconnect" href="https://fonts.googleapis.com">
++<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
++<style id="mint-theme">
++  /* ═══ ธีมมิ้นต์พาสเทล + ฟอนต์ Prompt (override ธีมเดิมทั้งหน้า) ═══ */
++  body { font-family: 'Prompt', sans-serif; font-size: 15px; background: linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%); color: #134e4a; }
++
++  .header { background: linear-gradient(135deg,#99f6e4 0%,#a7f3d0 100%); color: #115e59; }
++  .header h1 { color: #115e59; font-weight: 600; }
++  .header h1 span { color: #0f766e !important; }
++  .header p { color: #0f766e; }
++  .header .warn-bar { background: #ecfdf5; border-top: 1px solid #99f6e4; color: #b45309; }
++  #user-bar a, #user-bar button {
++    color: #0f766e !important; border: 1.5px solid #5eead4 !important;
++    background: rgba(255,255,255,.65) !important; font-family: inherit;
++  }
++  #user-bar span { color: #115e59; }
++
++  .card { border-radius: 16px; border: 1.5px solid #ccfbf1; box-shadow: 0 6px 20px rgba(13,148,136,.08); }
++  .card-header { border-bottom: 1px solid #ccfbf1; color: #115e59; font-weight: 600; }
++
++  .field-group label { color: #0f766e; font-weight: 500; }
++  .field-group input, .field-group select { border-color: #99f6e4; border-radius: 10px; background: #fdfefe; color: #134e4a; }
++  .field-group input:focus, .field-group select:focus { border-color: #14b8a6; }
++  .section-label { color: #14b8a6; border-bottom: 1px solid #ccfbf1; }
++
++  .btn-calc { background: #0d9488; border-radius: 12px; font-weight: 600; }
++  .btn-calc:hover { background: #0f766e; }
++  .btn-clear { background: #f0fdfa; color: #0f766e; border-radius: 10px; }
++  .btn-clear:hover { background: #ccfbf1; }
++  #hosxp-btn { background: #0d9488 !important; border-radius: 10px !important; font-family: inherit; font-weight: 600 !important; }
++  #hosxp-btn:hover { background: #0f766e !important; }
++
++  .rb-blue { background: #f0fdfa; } .rb-blue .rb-val { color: #0f766e; }
++  .res-box { border-radius: 12px; }
++  .res-box .rb-label { color: #428f87; }
++
++  .tab-bar { border-bottom: 1px solid #ccfbf1; }
++  .tab-btn.active { color: #0d9488; border-bottom-color: #2dd4bf; background: #f0fdfa; }
++
++  .diag-dropdown { border-color: #2dd4bf; border-radius: 10px; }
++  .diag-item:hover { background: #f0fdfa; }
++  .diag-code { color: #0f766e; }
++
++  .note-bar { background: #ecfdf5; border-top: 1px solid #a7f3d0; color: #115e59; }
++  .alerts-scroll::-webkit-scrollbar-thumb { background: #99f6e4; }
++</style>
+ </head>
+ <body>
+ 
+ <div class="header">
+-  <h1>🏥 DRG Grouper จำลอง + แจ้งเตือนแพทย์ <span style="font-size:15px;font-weight:400;opacity:.8">BY Dr.OraPat</span></h1>
+-  <p>ประมาณการ MDC · DRG · RW · CC/MCC · แจ้งเตือน DENY CODE สำหรับแพทย์</p>
+-  <div class="warn-bar">⚠️ ค่า RW เป็นประมาณการเพื่อการศึกษาเท่านั้น — ไม่ใช่ผล DRG Grouper อย่างเป็นทางการ (Thai DRG v6)</div>
++  <h1>🧮 เช็ก DRG และค่า RW ก่อนส่งเบิก <span style="font-size:15px;font-weight:400;opacity:.8">by Dr.OraPat</span></h1>
++  <p>ใส่เลข AN แล้วให้ระบบกรอกให้ หรือเลือกโรคเองก็ได้ — เดี๋ยวช่วยประเมินกลุ่ม DRG ค่า RW และชี้จุดที่เสี่ยงถูกตัดยอดให้</p>
++  <div class="warn-bar">💡 ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทานเท่านั้น ผลจริงยึดตาม Thai DRG Grouper ของ สปสช.</div>
+   <div id="user-bar" style="position:absolute;top:14px;right:20px;display:flex;align-items:center;gap:10px;font-size:13px">
+     <a href="/" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🏠 หน้าหลัก</a>
+     <a href="/tools/deny" style="color:#fff;opacity:.85;text-decoration:none;font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 12px">🔍 Deny Code Checker</a>
+@@ -136,24 +183,24 @@
+   <!-- ─── INPUT PANEL ─── -->
+   <div class="input-panel">
+     <div class="card">
+-      <div class="card-header">📋 กรอกข้อมูลผู้ป่วย</div>
++      <div class="card-header">📋 ข้อมูลผู้ป่วย</div>
+       <div class="card-body">
+ 
+         <!-- ── HOSXP FETCH ── -->
+-        <div class="section-label" style="margin-top:0">📥 ดึงข้อมูลจริงจาก HOSxP (ระบุ AN)</div>
++        <div class="section-label" style="margin-top:0">📥 มีเลข AN? ให้ระบบกรอกให้อัตโนมัติ</div>
+         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:6px">
+           <div class="field-group" style="flex:1;margin-bottom:0">
+             <label>AN (เลขที่ Admit)</label>
+             <input id="hosxp-an" placeholder="เช่น 680001234" inputmode="numeric" autocomplete="off">
+           </div>
+-          <button id="hosxp-btn" onclick="fetchFromHosxp()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">ดึงข้อมูล</button>
++          <button id="hosxp-btn" onclick="fetchFromHosxp()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">กรอกให้เลย</button>
+         </div>
+         <div id="hosxp-status" style="font-size:12px;color:#64748b;margin-bottom:10px"></div>
+ 
+         <!-- ── DIAGNOSIS SEARCH ── -->
+-        <div class="section-label" style="margin-top:0">🔍 ค้นหาจากชื่อโรค (แพทย์)</div>
++        <div class="section-label" style="margin-top:0">🔍 หรือค้นหาจากชื่อโรคก็ได้</div>
+         <div class="field-group" style="position:relative">
+-          <label>พิมพ์ชื่อโรคภาษาไทย / อังกฤษ</label>
++          <label>พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษก็ได้</label>
+           <input id="diag-search" placeholder="เช่น ปอดอักเสบ, heart failure, เบาหวาน, sepsis…"
+                  autocomplete="off" oninput="searchDiag(this.value,'pdx-list')" onfocus="searchDiag(this.value,'pdx-list')">
+           <div id="pdx-list" class="diag-dropdown" style="display:none"></div>
+@@ -10061,8 +10108,8 @@ async function fetchFromHosxp(){
+   const an = document.getElementById("hosxp-an").value.trim();
+   const st = document.getElementById("hosxp-status");
+   const btn = document.getElementById("hosxp-btn");
+-  if(!an){ st.textContent="กรุณาระบุ AN"; st.style.color="#dc2626"; return; }
+-  btn.disabled = true; st.style.color="#64748b"; st.textContent="กำลังดึงข้อมูลจาก HOSxP…";
++  if(!an){ st.textContent="อย่าลืมใส่เลข AN ก่อนนะ"; st.style.color="#dc2626"; return; }
++  btn.disabled = true; st.style.color="#64748b"; st.textContent="แป๊บนึงนะ กำลังดึงข้อมูลจาก HOSxP…";
+   try {
+     const r = await fetch(`/api/hosxp/patient?an=${encodeURIComponent(an)}`);
+     if(r.status===401){ location.href="/login"; return; }
+-- 
+2.43.0
+
