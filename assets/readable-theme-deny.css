@@ -1,0 +1,89 @@
+/* ═══ โหมดอ่านง่าย: เพิ่มความคมชัด (contrast) · ตัวอักษรใหญ่ขึ้น · ตารางอ่านง่าย ═══
+   แก้ปัญหา "ตาลาย มองไม่เห็น" — พื้นหลังเรียบไม่ไล่เฉด, ตัวหนังสือเข้มผ่าน WCAG AA */
+
+body{background:#eef4f3;color:#0f3b37;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ── Navbar ── */
+.topbar{background:#fff;border-bottom:2px solid #b9d9d4;box-shadow:0 2px 10px rgba(15,59,55,.08)}
+.brand{color:#0b5750;font-size:16.5px;font-weight:700}
+.nav-links a{color:#21605a !important;font-size:15px;font-weight:600}
+.nav-links a:hover{background:#d6f2ee !important;color:#0b5750 !important}
+.nav-links a.active{background:#0f766e !important;color:#fff !important;font-weight:700}
+.nav-user{color:#21605a;font-size:.9rem}
+.nav-logout{color:#0b5750 !important;border:2px solid #67c4bb !important;font-size:.85rem;font-weight:600}
+.nav-logout:hover{background:#d6f2ee !important}
+
+/* ── หัวเรื่องหน้า ── */
+.page-head h1{color:#0f3b37;font-size:24px;font-weight:700}
+.page-head h1 span{color:#256d65;font-size:14px;font-weight:500}
+.page-head p{color:#35706a;font-size:14px;margin-top:5px}
+
+/* ── โซนอัปโหลด ── */
+.upload-zone{background:#fff;border:3px dashed #67c4bb}
+.upload-zone:hover{border-color:#0f766e;background:#f2fbfa}
+.upload-zone h2{color:#0f3b37;font-size:1.2rem;font-weight:700}
+.upload-zone p{color:#4b5a6b;font-size:.92rem}
+
+/* ── แถบเครื่องมือ / ฟอร์ม ── */
+.bar{border:2px solid #cfe4e1;box-shadow:0 4px 14px rgba(15,59,55,.07)}
+.bar input,.bar select{border:2px solid #a9cfca;font-size:.95rem;color:#0f3b37;background:#fff}
+.bar input::placeholder{color:#6b7c86}
+.bar input:focus,.bar select:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.22)}
+
+/* ── ปุ่ม ── */
+.btn{font-size:.95rem;font-weight:700}
+.btn-primary{background:#0f766e}.btn-primary:hover{background:#0b5750}
+.btn-blue{background:#0d7d8f}.btn-blue:hover{background:#0a5f6d}
+.btn-green{background:#15803d}.btn-green:hover{background:#11642f}
+.btn-gray{background:#eef4f3;color:#14514b;border:2px solid #cfe4e1}
+.btn-gray:hover{background:#d6f2ee}
+
+/* ── การ์ดสถิติ (KPI) ── */
+.stat{background:#fff;border:2px solid #cfe4e1;box-shadow:0 4px 14px rgba(15,59,55,.07)}
+.stat .lbl{color:#42565f;font-size:.85rem;font-weight:600}
+.stat .num{font-weight:800}
+.s-total .num{color:#0f3b37}
+.s-clean .num{color:#15803d}
+.s-med   .num{color:#a45309}
+.s-high  .num{color:#b91c1c}
+.s-total .ic{background:#d6f2ee;color:#0b5750}
+.s-clean .ic{background:#d7f2de;color:#14602f}
+.s-med   .ic{background:#fbeac2;color:#8a4308}
+.s-high  .ic{background:#fbdada;color:#a01414}
+
+/* ── ตาราง: หัวตารางเข้ม แถวสลับสี เส้นแบ่งเห็นชัด ── */
+table{font-size:.92rem}
+th{background:#0f766e;color:#fff;font-weight:700;font-size:.9rem;padding:12px}
+td{color:#26343a;padding:11px 12px;border-bottom:1px solid #dbe6e4}
+tbody tr:nth-child(even) td{background:#f6faf9}
+tr:hover td{background:#d6f2ee !important}
+.risk-high {background:#fdeeee;border-left:6px solid #b91c1c}
+.risk-med  {background:#fdf5e6;border-left:6px solid #a45309}
+.risk-clean{background:#eefaf0;border-left:6px solid #15803d}
+
+/* ── ป้ายกำกับ ── */
+.tag{font-size:.8rem;font-weight:700;padding:3px 9px;border-radius:6px}
+.tag-cr  {background:#fbdada;color:#a01414}
+.tag-ea  {background:#fbeac2;color:#8a4308}
+.tag-ok  {background:#d7f2de;color:#14602f}
+.tag-code{background:#e4ddfb;color:#5b21b6}
+.tag-pdx {background:#d9e6fb;color:#1d4ed8}
+.tag-op  {background:#fbe2cd;color:#9a3412}
+.detail-list{color:#3d4d55;font-size:.85rem}
+.detail-list li::before{color:#4b5a6b}
+
+/* ── จับคู่คอลัมน์ ── */
+.col-map{background:#fff;border:2px solid #cfe4e1}
+.col-map h3{color:#0f3b37;font-size:1rem;font-weight:700}
+.col-map label{color:#42565f;font-size:.85rem;font-weight:600}
+.col-map select{border:2px solid #a9cfca;font-size:.88rem;color:#0f3b37}
+
+/* ── สถานะว่าง / แบ่งหน้า ── */
+.empty{color:#4b5a6b}
+.empty h3{color:#0f3b37;font-weight:700}
+.pager{color:#35706a;font-size:.9rem}
+.pager button{border:2px solid #a9cfca;color:#0b5750;font-weight:600}
+.pager button.cur{background:#0f766e;color:#fff;border-color:#0f766e}
+
+/* ── โฟกัสด้วยคีย์บอร์ดต้องเห็นชัด ── */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #0f766e;outline-offset:2px}

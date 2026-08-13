@@ -16,12 +16,12 @@ const IC = {
 
 // ── ธีมมิ้นต์พาสเทล ──
 const mint = {
-  bg: "linear-gradient(160deg,#f0fdfa 0%,#ecfdf5 45%,#f0f9ff 100%)",
-  ink: "#134e4a",
-  soft: "#5eead4",
-  teal: "#0d9488",
-  tealDark: "#0f766e",
-  sub: "#428f87",
+  bg: "#eef4f3",
+  ink: "#0f3b37",
+  soft: "#67c4bb",
+  teal: "#0f766e",
+  tealDark: "#0b5750",
+  sub: "#35706a",
 };
 
 const wrap = {
@@ -37,11 +37,11 @@ const wrap = {
 };
 
 const card = {
-  background: "rgba(255,255,255,.85)",
+  background: "#ffffff",
   backdropFilter: "blur(6px)",
   color: mint.ink,
   borderRadius: 22,
-  border: "1.5px solid #ccfbf1",
+  border: "2px solid #cfe4e1",
   padding: "30px 28px",
   width: 330,
   textDecoration: "none",
@@ -75,11 +75,11 @@ export default function Home() {
 
   return (
     <div style={wrap}>
-      <div style={{ width: 68, height: 68, borderRadius: 20, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}><Icon d={IC.activity} size={34} /></div>
-      <h1 style={{ fontSize: 28, margin: "0 0 6px", fontWeight: 600 }}>
+      <div style={{ width: 68, height: 68, borderRadius: 20, background: "#d6f2ee", color: "#0b5750", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}><Icon d={IC.activity} size={34} /></div>
+      <h1 style={{ fontSize: 29, margin: "0 0 6px", fontWeight: 700 }}>
         สวัสดี{user ? ` คุณ${user.name}` : ""}
       </h1>
-      <p style={{ color: mint.sub, margin: "0 0 30px", fontSize: 15, textAlign: "center" }}>
+      <p style={{ color: mint.sub, margin: "0 0 30px", fontSize: 16.5, textAlign: "center" }}>
         วันนี้อยากตรวจอะไรก่อนส่งเบิกดี?
       </p>
 
@@ -90,15 +90,15 @@ export default function Home() {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
         >
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.calc} size={26} /></div>
-          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#d6f2ee", color: "#0b5750", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.calc} size={26} /></div>
+          <h2 style={{ fontSize: 20, margin: "12px 0 6px", fontWeight: 700 }}>
             เช็ก DRG และค่า RW
           </h2>
-          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontSize: 15, color: mint.sub, lineHeight: 1.75, margin: 0 }}>
             ใส่เลข AN แล้วระบบดึงข้อมูลจาก HOSxP มาให้เอง
             บอกกลุ่ม DRG ค่า RW โดยประมาณ พร้อมชี้จุดที่เสี่ยงถูกตัดยอด
           </p>
-          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
+          <div style={{ marginTop: 14, color: mint.teal, fontSize: 15, fontWeight: 700 }}>
             เริ่มเช็กเลย →
           </div>
         </a>
@@ -109,15 +109,15 @@ export default function Home() {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
         >
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.shield} size={26} /></div>
-          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#d6f2ee", color: "#0b5750", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.shield} size={26} /></div>
+          <h2 style={{ fontSize: 20, margin: "12px 0 6px", fontWeight: 700 }}>
             ตรวจรหัสเสี่ยงโดนปฏิเสธ
           </h2>
-          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontSize: 15, color: mint.sub, lineHeight: 1.75, margin: 0 }}>
             เลือกช่วงวันที่จำหน่าย ระบบดึงเคสจาก HOSxP มาตรวจให้ทั้งชุด
             ว่ามีรหัสไหนเสี่ยงโดน สปสช. ปฏิเสธบ้าง
           </p>
-          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
+          <div style={{ marginTop: 14, color: mint.teal, fontSize: 15, fontWeight: 700 }}>
             เริ่มตรวจเลย →
           </div>
         </a>
@@ -128,15 +128,15 @@ export default function Home() {
           onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
         >
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ccfbf1", color: "#0f766e", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.steth} size={26} /></div>
-          <h2 style={{ fontSize: 19, margin: "12px 0 6px", fontWeight: 600 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#d6f2ee", color: "#0b5750", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.steth} size={26} /></div>
+          <h2 style={{ fontSize: 20, margin: "12px 0 6px", fontWeight: 700 }}>
             ประเมิน RW โหมดแพทย์
           </h2>
-          <p style={{ fontSize: 13.5, color: mint.sub, lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontSize: 15, color: mint.sub, lineHeight: 1.75, margin: 0 }}>
             สำหรับแพทย์หน้างาน — พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษได้เลย
             ระบบแปลงเป็น ICD-10 แล้วประเมิน DRG กับ RW ให้ทันที
           </p>
-          <div style={{ marginTop: 14, color: mint.teal, fontSize: 14, fontWeight: 600 }}>
+          <div style={{ marginTop: 14, color: mint.teal, fontSize: 15, fontWeight: 700 }}>
             เริ่มประเมินเลย →
           </div>
         </a>
@@ -145,19 +145,19 @@ export default function Home() {
       <div style={{ marginTop: 34, display: "flex", alignItems: "center", gap: 12 }}>
         {user && (
           <>
-            <span style={{ fontSize: 13, color: mint.sub }}>
+            <span style={{ fontSize: 14, color: mint.sub }}>
               เข้าใช้งานในชื่อ {user.name} ({user.role})
             </span>
             <button
               onClick={logout}
               style={{
                 background: "#fff",
-                border: `1.5px solid ${mint.soft}`,
+                border: `2px solid ${mint.soft}`,
                 color: mint.tealDark,
                 borderRadius: 999,
                 padding: "6px 16px",
                 cursor: "pointer",
-                fontSize: 13,
+                fontSize: 14,
                 fontFamily: "inherit",
               }}
             >
@@ -167,7 +167,7 @@ export default function Home() {
         )}
       </div>
 
-      <p style={{ fontSize: 12, color: "#7fb5ae", marginTop: 26, textAlign: "center" }}>
+      <p style={{ fontSize: 13.5, color: "#35706a", marginTop: 26, textAlign: "center" }}>
         ตัวเลขทั้งหมดเป็นการประมาณเพื่อช่วยตรวจทานเท่านั้น ผลจริงยึดตามระบบของ สปสช.
       </p>
     </div>

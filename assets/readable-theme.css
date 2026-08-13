@@ -1,0 +1,106 @@
+  /* ═══ โหมดอ่านง่าย: เพิ่มความคมชัด (contrast) · ตัวอักษรใหญ่ขึ้น · เส้นขอบเห็นชัด ═══
+     แก้ปัญหา "ตาลาย มองไม่เห็น" — พื้นหลังเรียบไม่ไล่เฉด, ตัวหนังสือเข้มผ่าน WCAG AA */
+
+  /* พื้นหลังเรียบ ไม่ไล่เฉดหลายสี ลดอาการตาลาย */
+  body { background: #eef4f3; color: #0f3b37; font-size: 16px; line-height: 1.65;
+         -webkit-font-smoothing: antialiased; }
+
+  /* ── Navbar: ตัวอักษรเข้มขึ้น อ่านออกทุกเมนู ── */
+  .topbar { background: #ffffff; border-bottom: 2px solid #b9d9d4; box-shadow: 0 2px 10px rgba(15,59,55,.08); }
+  .brand { color: #0b5750; font-size: 16.5px; font-weight: 700; }
+  .nav-links a { color: #21605a; font-size: 15px; font-weight: 600; }
+  .nav-links a:hover { background: #d6f2ee; color: #0b5750; }
+  .nav-links a.active { background: #0f766e; color: #ffffff; font-weight: 700; }
+  .nav-user { color: #21605a; font-size: 14.5px; }
+  .nav-logout { color: #0b5750; border: 2px solid #67c4bb; font-size: 14px; font-weight: 600; }
+  .nav-logout:hover { background: #d6f2ee; }
+
+  /* ── หัวเรื่องหน้า ── */
+  .page-head h1 { color: #0f3b37; font-size: 24px; font-weight: 700; }
+  .page-head h1 span { color: #256d65; font-size: 14px; font-weight: 500; }
+  .page-head p { color: #35706a; font-size: 14px; margin-top: 5px; }
+
+  /* ── การ์ด: ขอบชัด แยกกล่องออกจากกันได้ด้วยตา ── */
+  .card { background: #ffffff; border: 2px solid #cfe4e1; box-shadow: 0 4px 14px rgba(15,59,55,.07); }
+  .card-header { color: #0f3b37; font-size: 16px; font-weight: 700; border-bottom: 2px solid #cfe4e1;
+                 background: #f4faf9; }
+
+  /* ── ฟอร์ม: ป้ายชื่อเข้ม ช่องกรอกใหญ่ ขอบเห็นชัด โฟกัสเด่น ── */
+  .field-group label { color: #14514b; font-size: 14px; font-weight: 600; }
+  .field-group input, .field-group select {
+    font-size: 16px; padding: 10px 12px; border: 2px solid #a9cfca; background: #ffffff; color: #0f3b37;
+  }
+  .field-group input::placeholder { color: #6b7c86; }
+  .field-group input:focus, .field-group select:focus {
+    border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15,118,110,.22);
+  }
+  .field-group .hint { color: #4b5a6b; font-size: 12.5px; }
+  .section-label { color: #0b5750; font-size: 13.5px; font-weight: 700; border-bottom: 2px solid #cfe4e1; }
+
+  /* ── ปุ่ม ── */
+  .btn-calc { background: #0f766e; font-size: 18px; font-weight: 700; }
+  .btn-calc:hover { background: #0b5750; }
+  .btn-clear { background: #eef4f3; color: #14514b; border: 2px solid #cfe4e1; font-size: 14.5px; font-weight: 600; }
+  .btn-clear:hover { background: #d6f2ee; }
+  #hosxp-btn { background: #0f766e !important; font-size: 15px !important; }
+  #hosxp-btn:hover { background: #0b5750 !important; }
+  #hosxp-status { color: #4b5a6b !important; font-size: 13px !important; }
+
+  /* ── กล่องผลลัพธ์: มีขอบ + ตัวเลขเข้ม อ่านได้แม้แสงจ้า ── */
+  .res-box { border: 2px solid #d8e3e1; }
+  .res-box .rb-label { color: #435c5f; font-size: 12px; font-weight: 700; letter-spacing: .2px; }
+  .res-box .rb-val { font-size: 18px; }
+  .rw-big { font-size: 34px !important; }
+  .rb-blue   { background: #eef7f6; border-color: #b7d8d4; } .rb-blue .rb-val   { color: #0b5750; }
+  .rb-green  { background: #eefaf0; border-color: #b6dfc0; } .rb-green .rb-val  { color: #15803d; }
+  .rb-red    { background: #fdeeee; border-color: #f0bcbc; } .rb-red .rb-val    { color: #b91c1c; }
+  .rb-amber  { background: #fdf5e6; border-color: #ecd0a1; } .rb-amber .rb-val  { color: #a45309; }
+  .rb-purple { background: #eef7f6; border-color: #b7d8d4; } .rb-purple .rb-val { color: #0b5750; }
+  .rb-gray   { background: #f4f6f6; border-color: #d3dbda; } .rb-gray .rb-val   { color: #37474a; }
+
+  /* ── ป้าย CC/MCC ── */
+  .tag { font-size: 13px; font-weight: 700; padding: 3px 11px; }
+  .tag-mcc  { background: #fbdada; color: #a01414; }
+  .tag-cc   { background: #fbeac2; color: #8a4308; }
+  .tag-none { background: #e6ebea; color: #4b5a6b; }
+
+  /* ── แถบเตือน: ขอบซ้ายหนา ตัวอักษรเข้ม ── */
+  .alert-item { border: 2px solid #dde5e4; border-left-width: 6px; }
+  .alert-high   { background: #fdeeee; border-color: #f0bcbc; border-left-color: #b91c1c; }
+  .alert-medium { background: #fdf5e6; border-color: #ecd0a1; border-left-color: #a45309; }
+  .alert-low    { background: #eef7f6; border-color: #b7d8d4; border-left-color: #0f766e; }
+  .alert-title { font-size: 16px; font-weight: 700; }
+  .alert-high .alert-title   { color: #a01414; }
+  .alert-medium .alert-title { color: #8a4308; }
+  .alert-low .alert-title    { color: #0b5750; }
+  .alert-body { color: #26343a; font-size: 15px; line-height: 1.8; }
+  .alert-ok { background: #eefaf0; border: 2px solid #b6dfc0; color: #14602f; font-size: 15.5px; }
+  .alert-empty, .placeholder { color: #4b5a6b; font-size: 14.5px; }
+
+  /* ── แท็บ ── */
+  .tab-bar { border-bottom: 2px solid #cfe4e1; }
+  .tab-btn { color: #35706a; font-size: 15px; font-weight: 600; }
+  .tab-btn:hover { color: #0b5750; background: #eef7f6; }
+  .tab-btn.active { color: #0b5750; background: #d6f2ee; border-bottom-color: #0f766e; border-bottom-width: 4px; }
+
+  /* ── ผลค้นหาชื่อโรค ── */
+  .diag-dropdown { border: 2px solid #0f766e; box-shadow: 0 8px 24px rgba(15,59,55,.18); }
+  .diag-item { border-bottom: 1px solid #dfeceb; padding: 10px 12px; }
+  .diag-item:hover { background: #d6f2ee; }
+  .diag-code { color: #0b5750; font-size: 14px; font-weight: 700; }
+  .diag-name { color: #26343a; font-size: 14px; }
+  .diag-name small { color: #4b5a6b; font-size: 12px; }
+
+  /* ── แถบหมายเหตุ ── */
+  .note-bar { background: #fdf5e6; border-top: 2px solid #ecd0a1; color: #6b4310; font-size: 13px; }
+  .header .warn-bar { color: #8a4308; font-size: 12.5px; font-weight: 500; }
+
+
+  /* ── ช่อง PDx เน้นให้เห็นว่าเป็นช่องบังคับ ── */
+  #pdx { background: #f2fbfa; border-color: #5aa9a1; font-weight: 600; }
+  #pdx:focus { border-color: #0f766e; }
+
+  /* ── โฟกัสด้วยคีย์บอร์ดต้องเห็นชัด ── */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid #0f766e; outline-offset: 2px;
+  }
