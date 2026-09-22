@@ -66,3 +66,10 @@ SQL ทั้งหมดดูได้ที่ [`docs/sql/hosxp_queries.sql`]
 
 > ⚠️ ค่า RW / ผลตรวจเป็นเครื่องมือช่วยคัดกรองเพื่อการศึกษา/ทบทวนก่อนส่งเบิกเท่านั้น
 > ไม่ใช่ผลจาก Thai DRG Grouper อย่างเป็นทางการ
+
+## Admission search and form update
+
+- Search AN or patient name with GET /api/hosxp/search?q=... (authenticated). Results are limited to 20 latest admissions; select an admission before importing.
+- General information appears first. Diagnosis suggestions use wide, keyboard-focusable buttons.
+- Run search-handler checks with: node tests/admission-search.cjs
+- UI was verified with mocked HOSxP responses at 375, 768 and 1440 px. Live HOSxP integration requires the site's DB settings.

@@ -226,7 +226,7 @@
   .placeholder .big { font-size: 26px; }
 </style>
 </head>
-<body>
+<body class="drg-page">
 
 <nav class="topbar">
   <a class="brand" href="/"><svg class="ico" viewBox="0 0 24 24" width="20" height="20"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>PPC Coding Tools</span></a>
@@ -254,20 +254,59 @@
       <div class="card-body">
 
 <div class="form-grid">
-        <div class="fcol">
+<section class="fcol general-section">
+        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> ข้อมูลทั่วไป</div>
         <!-- ── HOSXP FETCH ── -->
-        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> มีเลข AN? ให้ระบบกรอกให้อัตโนมัติ</div>
+        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> ค้นหาผู้ป่วยจาก HOSxP</div>
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:6px">
           <div class="field-group" style="flex:1;margin-bottom:0">
-            <label>AN (เลขที่ Admit)</label>
-            <input id="hosxp-an" placeholder="เช่น 680001234" inputmode="numeric" autocomplete="off">
+            <label for="hosxp-an">AN (เลขที่ Admit) หรือชื่อผู้ป่วย</label>
+            <input id="hosxp-an" placeholder="กรอก AN หรือชื่อ–นามสกุล" maxlength="100" autocomplete="off">
           </div>
-          <button id="hosxp-btn" onclick="fetchFromHosxp()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">กรอกให้เลย</button>
+          <button id="hosxp-btn" onclick="searchAdmissions()" style="padding:10px 16px;border:none;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap">ค้นหาผู้ป่วย</button>
         </div>
-        <div id="hosxp-status" style="font-size:12px;color:#64748b;margin-bottom:10px"></div>
+        <div id="admission-results" hidden></div>
+        <div id="hosxp-status" role="status" aria-live="polite" style="font-size:12px;color:#64748b;margin-bottom:10px"></div>
 
-        <!-- ── DIAGNOSIS SEARCH ── -->
-        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> หรือค้นหาจากชื่อโรคก็ได้</div>
+
+        <div class="row3">
+          <div class="field-group"><label>อายุ (ปี)</label><input id="age" type="number" min="0" max="150" placeholder="—"></div>
+          <div class="field-group"><label>LOS (วัน)</label><input id="los" type="number" min="0" placeholder="—"></div>
+          <div class="field-group">
+            <label>เพศ</label>
+            <select id="sex"><option>ชาย</option><option>หญิง</option></select>
+          </div>
+        </div>
+
+        <div class="section-label">สถานะการจำหน่าย</div>
+        <div class="row2">
+          <div class="field-group">
+            <label>Discharge Status</label>
+            <select id="dchtype">
+              <option value="">— ไม่ระบุ —</option>
+              <option value="1">1 = หาย (Recovered)</option>
+              <option value="2">2 = ดีขึ้น (Improved)</option>
+              <option value="3">3 = ไม่ดีขึ้น (Not improved)</option>
+              <option value="4">4 = ตาย (Died)</option>
+              <option value="5">5 = ส่งต่อ (Referred)</option>
+              <option value="6">6 = หนีกลับ (LAMA)</option>
+              <option value="7">7 = ครบกำหนด</option>
+              <option value="8">8 = อื่นๆ</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>ประเภทโรงพยาบาล</label>
+            <select id="typehosp">
+              <option value="">— ไม่ระบุ —</option>
+              <option value="1">1 = ในเครือข่าย</option>
+              <option value="2">2 = นอกเครือข่าย</option>
+            </select>
+          </div>
+        </div>
+
+</section>
+<section class="fcol diagnosis-section">        <!-- ── DIAGNOSIS SEARCH ── -->
+        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> การวินิจฉัยหลัก (PDx)</div>
         <div class="field-group" style="position:relative">
           <label>พิมพ์ชื่อโรคเป็นไทยหรืออังกฤษก็ได้</label>
           <input id="diag-search" placeholder="เช่น ปอดอักเสบ, heart failure, เบาหวาน, sepsis…"
@@ -281,9 +320,8 @@
           <label>PDx (โรคหลัก) <span style="color:#dc2626">*</span></label>
           <input id="pdx" placeholder="เช่น A41.9, I21.0, J18.9" autocomplete="off">
         </div>
-        
-        </div>
-        <div class="fcol">
+
+
         <div class="section-label" style="margin-top:0">การวินิจฉัยรอง (SDx)</div>
         <div class="row2">
           <div class="field-group" style="position:relative">
@@ -352,8 +390,8 @@
         <button type="button" id="sdx-more-btn" class="btn-clear" style="margin-top:2px" onclick="showSdxExtra()"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="M12 5v14"/></svg> เพิ่มช่อง SDx (สูงสุด 12)</button>
 
 
-        </div>
-        <div class="fcol">
+        </section>
+<section class="fcol procedure-section">
         <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg> OR Procedure (ICD-9-CM)</div>
         <div class="field-group"><label>Operation 1</label><input id="op1" placeholder="เช่น 38.48, 00.66, 81.54"></div>
         <div class="row2">
@@ -388,45 +426,8 @@
         </div>
 
 
-        </div>
-        <div class="fcol">
-        <div class="section-label" style="margin-top:0"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> ข้อมูลทั่วไป</div>
-        <div class="row3">
-          <div class="field-group"><label>อายุ (ปี)</label><input id="age" type="number" min="0" max="150" placeholder="—"></div>
-          <div class="field-group"><label>LOS (วัน)</label><input id="los" type="number" min="0" placeholder="—"></div>
-          <div class="field-group">
-            <label>เพศ</label>
-            <select id="sex"><option>ชาย</option><option>หญิง</option></select>
-          </div>
-        </div>
-
-        <div class="section-label">สถานะการจำหน่าย</div>
-        <div class="row2">
-          <div class="field-group">
-            <label>Discharge Status</label>
-            <select id="dchtype">
-              <option value="">— ไม่ระบุ —</option>
-              <option value="1">1 = หาย (Recovered)</option>
-              <option value="2">2 = ดีขึ้น (Improved)</option>
-              <option value="3">3 = ไม่ดีขึ้น (Not improved)</option>
-              <option value="4">4 = ตาย (Died)</option>
-              <option value="5">5 = ส่งต่อ (Referred)</option>
-              <option value="6">6 = หนีกลับ (LAMA)</option>
-              <option value="7">7 = ครบกำหนด</option>
-              <option value="8">8 = อื่นๆ</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>ประเภทโรงพยาบาล</label>
-            <select id="typehosp">
-              <option value="">— ไม่ระบุ —</option>
-              <option value="1">1 = ในเครือข่าย</option>
-              <option value="2">2 = นอกเครือข่าย</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> ประมาณการรายได้</div>
+        </section>
+<section class="fcol action-section">        <div class="section-label"><svg class="ico" viewBox="0 0 24 24" width="14" height="14"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg> ประมาณการรายได้</div>
         <div class="field-group">
           <label>อัตราต่อ RW (บาท) <span style="font-weight:400;color:#94a3b8;font-size:11px">— สปสช. ≈ 8,800 บ./RW</span></label>
           <input id="rw_rate" type="number" min="0" placeholder="เช่น 8800" value="8800" style="font-size:16px">
@@ -434,13 +435,8 @@
 
         <button class="btn-calc" onclick="calculate()"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><polygon points="6 3 20 12 6 21 6 3"/></svg> คำนวณ DRG</button>
         <button class="btn-clear" onclick="clearAll()"><svg class="ico" viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> ล้างข้อมูล</button>
-        </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
+</section>
+</div></div></div></div>
   <!-- ─── RESULT PANEL ─── -->
   <div class="result-panel">
     <div class="card" style="margin-bottom:14px">
@@ -9240,7 +9236,7 @@ let _activeDropdown = null;
 function searchDiag(q, listId){
   const list = document.getElementById(listId);
   // หาช่อง input ที่ list นี้สังกัด
-  const targetId = listId.replace('-list','');
+  const targetId = listId === 'pdx-list' ? 'diag-search' : listId.replace('-list','');
   const targetInput = document.getElementById(targetId);
 
   q = q.trim();
@@ -9259,12 +9255,19 @@ function searchDiag(q, listId){
 
   if(!results.length){ list.style.display='none'; return; }
 
-  list.innerHTML = results.map(([code,th,en])=>
-    `<div class="diag-item" onclick="selectDiag('${code}','${th}','${targetId}','${listId}')">
-      <span class="diag-code">${code}</span>
-      <span class="diag-name">${th}<small>${en}</small></span>
-    </div>`
-  ).join('');
+  list.replaceChildren();
+  results.forEach(([code, th, en]) => {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'diag-item';
+    const codeEl = document.createElement('span');
+    codeEl.className = 'diag-code'; codeEl.textContent = code;
+    const nameEl = document.createElement('span');
+    nameEl.className = 'diag-name'; nameEl.textContent = th;
+    const english = document.createElement('small'); english.textContent = en;
+    nameEl.append(english); button.append(codeEl, nameEl);
+    button.onclick = () => selectDiag(code, th, targetId, listId);
+    list.append(button);
+  });
   list.style.display='block';
   _activeDropdown = listId;
 }
@@ -10173,7 +10176,16 @@ function calculate(){
   switchTab("alerts");
 }
 
-function clearAll(){
+function clearAll(cancelPending = true){
+  if(cancelPending) patientRequest++;
+  document.getElementById('hosxp-btn').disabled = false;
+  document.getElementById('hosxp-an').value = '';
+  document.getElementById('diag-search').value = '';
+  document.getElementById('hosxp-status').textContent = '';
+  document.getElementById('admission-results').hidden = true;
+  document.getElementById('admission-results').replaceChildren();
+  document.getElementById('sex').selectedIndex = 0;
+  document.querySelectorAll('.diag-dropdown').forEach(el => el.style.display = 'none');
   ["pdx",...SDX_IDS.map(i=>"sdx"+i),...OP_IDS.map(i=>"op"+i),"nop1","nop2","nop3","age","los"].forEach(id=>{
     document.getElementById(id).value="";
   });
@@ -10215,11 +10227,57 @@ window.onload = function(){
   // Enter key — ช่อง AN กด Enter = ดึงข้อมูล, ช่องอื่น = คำนวณ
   document.addEventListener("keydown", e=>{
     if(e.key!=="Enter"||e.target.tagName!=="INPUT") return;
-    if(e.target.id==="hosxp-an"){ fetchFromHosxp(); } else { calculate(); }
+    if(e.target.id==="hosxp-an"){ e.preventDefault(); searchAdmissions(); } else { calculate(); }
   });
 
   loadCurrentUser();
 };
+
+let patientRequest = 0;
+async function searchAdmissions(){
+  const q = document.getElementById('hosxp-an').value.trim();
+  const status = document.getElementById('hosxp-status');
+  const list = document.getElementById('admission-results');
+  const button = document.getElementById('hosxp-btn');
+  const requestId = ++patientRequest;
+  list.hidden = true; list.replaceChildren();
+  button.disabled = false;
+  status.style.color = '#14514b';
+  if(q.length < 2){ status.textContent = 'กรอก AN หรือชื่ออย่างน้อย 2 ตัวอักษร'; return; }
+  button.disabled = true; status.textContent = 'กำลังค้นหาผู้ป่วย…';
+  try {
+    const response = await fetch('/api/hosxp/search?q=' + encodeURIComponent(q));
+    if(response.status === 401){ location.href = '/login'; return; }
+    const data = await response.json();
+    if(requestId !== patientRequest) return;
+    if(!response.ok) throw new Error(data.error || 'ค้นหาไม่สำเร็จ');
+    if(!data.admissions.length){ status.textContent = 'ไม่พบผู้ป่วย ลองตรวจสอบ AN หรือค้นหาด้วยชื่ออีกครั้ง'; return; }
+    status.textContent = data.hasMore ? 'แสดง 20 รายการล่าสุด กรุณาระบุชื่อให้ละเอียดขึ้น' : 'เลือกครั้งที่ Admit เพื่อเติมข้อมูล';
+    data.admissions.forEach(item => {
+      const row = document.createElement('button'); row.type = 'button'; row.className = 'admission-item';
+      const name = document.createElement('strong'); name.textContent = item.ptname;
+      const detail = document.createElement('span');
+      detail.textContent = 'AN ' + item.an + ' · HN ' + item.hn + ' · รับเข้า ' + item.regdate + ' · ' + (item.dchdate ? 'จำหน่าย ' + item.dchdate : 'ยังไม่จำหน่าย');
+      row.append(name, detail); row.onclick = () => { list.hidden = true; fetchFromHosxp(String(item.an)); };
+      list.append(row);
+    });
+    list.hidden = false;
+  } catch(error){ if(requestId === patientRequest) status.textContent = error.message || 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'; }
+  finally { if(requestId === patientRequest) button.disabled = false; }
+}
+document.getElementById('hosxp-an').addEventListener('input', () => {
+  patientRequest++;
+  document.getElementById('admission-results').hidden = true;
+  document.getElementById('hosxp-status').textContent = '';
+  document.getElementById('hosxp-btn').disabled = false;
+});
+document.addEventListener('keydown', event => {
+  if(event.key === 'Escape') document.querySelectorAll('.diag-dropdown').forEach(el => el.style.display = 'none');
+});
+document.querySelectorAll('.field-group').forEach(group => {
+  const label = group.querySelector('label'); const input = group.querySelector('input, select');
+  if(label && input) label.htmlFor = input.id;
+});
 
 // ═══ AUTH + HOSXP (เชื่อมระบบ auth แบบ ppc-hos-10667) ═══
 async function loadCurrentUser(){
@@ -10236,8 +10294,8 @@ async function doLogout(){
   location.href="/login";
 }
 
-async function fetchFromHosxp(){
-  const an = document.getElementById("hosxp-an").value.trim();
+async function fetchFromHosxp(an){
+  const requestId = ++patientRequest;
   const st = document.getElementById("hosxp-status");
   const btn = document.getElementById("hosxp-btn");
   if(!an){ st.textContent="อย่าลืมใส่เลข AN ก่อนนะ"; st.style.color="#dc2626"; return; }
@@ -10246,9 +10304,10 @@ async function fetchFromHosxp(){
     const r = await fetch(`/api/hosxp/patient?an=${encodeURIComponent(an)}`);
     if(r.status===401){ location.href="/login"; return; }
     const d = await r.json();
+    if(requestId !== patientRequest) return;
     if(!r.ok){ st.textContent = d.error || "ดึงข้อมูลไม่สำเร็จ"; st.style.color="#dc2626"; return; }
 
-    clearAll();
+    clearAll(false);
     document.getElementById("hosxp-an").value = an;
     document.getElementById("pdx").value = d.pdx || "";
     const sdxIn = (d.sdx||[]).slice(0,12);
@@ -10275,11 +10334,12 @@ async function fetchFromHosxp(){
     ].filter(Boolean);
     st.textContent = parts.join(" · ");
     st.style.color = "#0f766e";
-    calculate();
+    if(d.pdx) calculate();
   } catch {
+    if(requestId !== patientRequest) return;
     st.textContent = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้"; st.style.color="#dc2626";
   } finally {
-    btn.disabled = false;
+    if(requestId === patientRequest) btn.disabled = false;
   }
 }
 </script>

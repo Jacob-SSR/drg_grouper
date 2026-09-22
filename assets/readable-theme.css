@@ -98,6 +98,52 @@
 
   /* ── ช่อง PDx เน้นให้เห็นว่าเป็นช่องบังคับ ── */
   #pdx { background: #f2fbfa; border-color: #5aa9a1; font-weight: 600; }
+
+  /* DRG workflow: general information, diagnoses, procedures, then calculation. */
+  .drg-page .input-panel > .card { overflow: visible; box-shadow: none; border-radius: 12px; }
+  .drg-page .card-body { padding: 28px; }
+  .drg-page .form-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; }
+  .drg-page .general-section { grid-column: 1 / -1; padding-bottom: 24px; border-bottom: 1px solid #cfe4e1; }
+  .drg-page .general-section > .section-label:first-child { font-size: 20px; border: 0; margin-bottom: 16px; }
+  .drg-page .general-section > .row3 { max-width: 640px; }
+  .drg-page .general-section > .row2 { max-width: 840px; }
+  .drg-page .general-section > div[style*="display:flex"] { max-width: 840px; }
+  .drg-page .section-label { font-size: 16px; letter-spacing: 0; text-transform: none; padding-bottom: 10px; margin: 24px 0 16px; }
+  .drg-page .field-group label { font-size: 15px; }
+  .drg-page .field-group { min-width: 0; margin-bottom: 16px; }
+  .drg-page .field-group input, .drg-page .field-group select { min-height: 48px; border-width: 1px; border-radius: 8px; }
+  .drg-page .row2, .drg-page .row3 { gap: 12px; }
+  .drg-page .diagnosis-section .row2 { grid-template-columns: minmax(0, 1fr); }
+  .drg-page .action-section { grid-column: 1 / -1; border-top: 1px solid #cfe4e1; padding-top: 24px; display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; gap: 12px 24px; align-items: end; }
+  .drg-page .action-section > .section-label { grid-column: 1 / -1; margin: 0; border: 0; padding: 0; }
+  .drg-page .action-section .field-group { margin: 0; max-width: 480px; }
+  .drg-page .action-section button { margin: 0; min-height: 48px; padding: 10px 24px; }
+  .drg-page .diag-dropdown { width: 100%; max-height: 320px; overflow-x: hidden; }
+  .drg-page .diag-item { width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; background: #fcfefd; border: 0; border-bottom: 1px solid #dfeceb; font: inherit; text-align: left; }
+  .drg-page .diag-item:hover, .drg-page .diag-item:focus-visible { background: #e5f4f0; }
+  .drg-page .diag-name { min-width: 0; font-size: 16px; line-height: 1.65; overflow-wrap: anywhere; }
+  .drg-page .diag-name small { font-size: 14px; line-height: 1.5; }
+  .drg-page .diag-code { white-space: nowrap; padding-top: 3px; }
+  .drg-page #hosxp-status { font-size: 14px !important; margin-top: 12px; }
+  .drg-page #admission-results { max-height: 300px; overflow-y: auto; max-width: 840px; border: 1px solid #a9cfca; border-radius: 8px; margin-top: 12px; }
+  .drg-page .admission-item { display: block; width: 100%; padding: 12px 16px; background: #fcfefd; border: 0; border-bottom: 1px solid #dfeceb; color: #0f3b37; font: inherit; text-align: left; cursor: pointer; }
+  .drg-page .admission-item span { display: block; font-size: 14px; color: #4b5a6b; }
+  .drg-page .admission-item:hover { background: #e5f4f0; }
+  .drg-page button:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+  .drg-page button:disabled { opacity: .6; cursor: wait; }
+  @media(max-width: 700px) {
+    .drg-page .main { padding: 12px; }
+    .drg-page .card-body { padding: 16px; }
+    .drg-page .form-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .drg-page .action-section { grid-template-columns: minmax(0, 1fr); }
+    .drg-page .general-section > div[style*="display:flex"] { flex-wrap: wrap; }
+    .drg-page .general-section > div[style*="display:flex"] > .field-group { flex-basis: 100% !important; }
+    .drg-page .general-section > .row2 { grid-template-columns: minmax(0, 1fr); }
+    .drg-page .topbar { position: static; height: auto; min-height: 60px; padding: 12px 16px; flex-wrap: wrap; overflow: visible; }
+    .drg-page .brand, .drg-page .nav-links a { white-space: nowrap; flex-shrink: 0; }
+    .drg-page .nav-links { order: 3; flex-basis: 100%; overflow-x: auto; padding-bottom: 4px; }
+    .drg-page .nav-right { margin-left: 0; flex-wrap: wrap; }
+  }
   #pdx:focus { border-color: #0f766e; }
 
   /* ── โฟกัสด้วยคีย์บอร์ดต้องเห็นชัด ── */
